@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base Converter</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Base Converter</h1>
+            <div class="language-options">
+                <button id="lang-en" class="active">EN</button>
+                <button id="lang-he">HE</button>
+            </div>
+        </header>
+
+        <main>
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="input-number" id="label-number">Enter a number:</label>
+                    <input type="text" id="input-number" placeholder="e.g., 10110">
+                </div>
+                <div class="input-group">
+                    <label for="from-base" id="label-from-base">Source Base:</label>
+                    <select id="from-base">
+                        <option value="2">Binary (2)</option>
+                        <option value="8">Octal (8)</option>
+                        <option value="10">Decimal (10)</option>
+                        <option value="16">Hexadecimal (16)</option>
+                    </select>
+                </div>
+                <button id="convert-btn">Convert</button>
+            </div>
+
+            <div class="output-section">
+                <div class="output-header">
+                    <h2 id="output-title">Results:</h2>
+                    <div class="action-buttons">
+                        <button id="copy-btn" title="Copy to Clipboard"><i class="fas fa-copy"></i></button>
+                        <button id="share-btn" title="Share"><i class="fas fa-share-alt"></i></button>
+                        <button id="clear-btn" title="Clear All"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </div>
+                <div class="results-box" id="results">
+                    </div>
+                <div class="text-size-options">
+                    <button id="small-text">A</button>
+                    <button id="medium-text" class="active">A</button>
+                    <button id="large-text">A</button>
+                </div>
+            </div>
+            
+            <div class="explanation-section" style="display: none;">
+                <h3 id="explanation-title">Detailed Explanation</h3>
+                <div class="explanation-options">
+                    <button class="exp-btn" data-base="2">Binary</button>
+                    <button class="exp-btn" data-base="8">Octal</button>
+                    <button class="exp-btn" data-base="10">Decimal</button>
+                    <button class="exp-btn" data-base="16">Hex</button>
+                </div>
+                <div id="explanation-content" class="results-box">
+                    </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
