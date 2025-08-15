@@ -10,22 +10,25 @@
  */
 function toDecimal(number, base) {
     let decimalValue = 0;
-    // Reverse the digits to process from right to left
+    // Reverse the digits to process from right to left, which corresponds to
+    // increasing powers of the base (e.g., 10^0, 10^1, etc.).
     const digits = String(number).toUpperCase().split('').reverse();
     const digitsMap = "0123456789ABCDEF";
 
     for (let i = 0; i < digits.length; i++) {
         let digit = digits[i];
         let value;
+        // Handle hexadecimal digits 'A' through 'F'
         if (base === 16 && 'A' <= digit && digit <= 'F') {
             value = digitsMap.indexOf(digit);
         } else {
             value = parseInt(digit);
         }
-        // Check for invalid digits for the given base
+        // Check for invalid digits for the given base (e.g., a '2' in a binary number)
         if (isNaN(value) || value >= base) {
             return null;
         }
+        // Calculate the value of the current digit and add it to the total
         decimalValue += value * Math.pow(base, i);
     }
     return decimalValue;
@@ -39,21 +42,24 @@ function toDecimal(number, base) {
  * @returns {string} The converted number as a string.
  */
 function fromDecimal(number, base, padToBits = null) {
+    // Handle the special case where the number is 0
     if (number === 0) {
-        return (padToBits && base === 2) ? '0'.repeat(padToBits) : "0";
+        return (padToBits && base === 2) ?
+            '0'.repeat(padToBits) : "0";
     }
 
     const digitsMap = "0123456789ABCDEF";
     let convertedNumber = "";
     let currentNumber = number;
-
+    // Use repeated division and remainder to get the digits
     while (currentNumber > 0) {
         let remainder = currentNumber % base;
+        // Prepend the new digit to the string to build the number in the correct order
         convertedNumber = digitsMap[remainder] + convertedNumber;
         currentNumber = Math.floor(currentNumber / base);
     }
 
-    // Pad binary results if specified
+    // Pad binary results if specified (e.g., for 8-bit representation)
     if (padToBits && base === 2) {
         return convertedNumber.padStart(padToBits, '0');
     }
@@ -114,7 +120,6 @@ const langData = {
         expPaddedBinary: (result) => `  מרופד ל-8 ביטים: ${result}`,
     }
 };
-
 let currentLang = 'en';
 
 /**
@@ -134,7 +139,7 @@ function updateUI() {
     document.querySelector('.exp-btn[data-base="10"]').textContent = data.decimal;
     document.querySelector('.exp-btn[data-base="16"]').textContent = data.hex;
 
-    // Show/hide usage instructions text based on language
+    // Show/hide usage instructions text based on language and adjust text direction
     if (currentLang === 'he') {
         document.body.style.direction = 'rtl';
         document.getElementById('usage-text-he').style.display = 'block';
@@ -187,16 +192,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('explanation-content').style.fontSize = '1.2em';
         updateTextSizeButtons('large-text');
     });
-
     // Event listeners for explanation buttons
     document.querySelectorAll('.exp-btn').forEach(button => {
         button.addEventListener('click', handleExplanation);
     });
-
     // Event listener for the new collapsible usage section
     const usageToggle = document.getElementById('usage-toggle');
     const usageContent = document.getElementById('usage-content');
-    
     usageToggle.addEventListener('click', () => {
         const isOpen = usageContent.classList.toggle('open');
         usageToggle.classList.toggle('open', isOpen);
@@ -222,8 +224,7 @@ function handleConversion() {
     const fromBase = parseInt(document.getElementById('from-base').value);
     const resultsDiv = document.getElementById('results');
     const explanationSection = document.querySelector('.explanation-section');
-
-    // Validate the input number
+    // Validate the input number using regex
     if (!validateInput(inputNumber, fromBase)) {
         resultsDiv.textContent = langData[currentLang].invalidNumber;
         explanationSection.style.display = 'none';
@@ -231,6 +232,7 @@ function handleConversion() {
     }
 
     let decimalValue;
+    // Handle case where source base is already decimal
     if (fromBase === 10) {
         decimalValue = parseInt(inputNumber);
     } else {
@@ -243,18 +245,16 @@ function handleConversion() {
         return;
     }
 
-    // Perform conversions to other bases
+    // Perform conversions to other bases and format the output
     const binary = fromDecimal(decimalValue, 2, 8);
     const octal = fromDecimal(decimalValue, 8);
     const hex = fromDecimal(decimalValue, 16);
-
     const output = `
   Decimal: ${decimalValue}
   Binary:  ${binary}
   Octal:   ${octal}
   Hex:     ${hex}
     `;
-
     resultsDiv.textContent = output;
     explanationSection.style.display = 'block';
 }
@@ -267,7 +267,6 @@ function handleConversion() {
  */
 function validateInput(number, base) {
     if (!number) return false;
-
     switch (base) {
         case 2:
             return /^[01]+$/.test(number);
@@ -293,6 +292,7 @@ function handleExplanation(event) {
     const explanationContent = document.getElementById('explanation-content');
     explanationContent.innerHTML = '';
     
+    // Validate input before generating explanation
     if (!validateInput(inputNumber, fromBase)) {
         explanationContent.textContent = langData[currentLang].invalidNumber;
         return;
@@ -312,14 +312,12 @@ function handleExplanation(event) {
 
     let explanationHTML = '';
     const data = langData[currentLang];
-
     // Step 1: Conversion to Decimal
     if (fromBase !== 10) {
         explanationHTML += `<h4>${data.expToDecTitle(inputNumber, fromBase)}</h4>`;
         const digits = String(inputNumber).toUpperCase().split('').reverse();
         let sum = 0;
         const digitsMap = "0123456789ABCDEF";
-
         for (let i = 0; i < digits.length; i++) {
             const digit = digits[i];
             let value;
@@ -341,9 +339,8 @@ function handleExplanation(event) {
         explanationHTML += `<h4>${data.expFromDecTitle(decimalValue, toBase)}</h4>`;
         
         let currentNumber = decimalValue;
-        let convertedNumber = "";
         let steps = [];
-
+        // Loop to generate all division steps and store them
         while (currentNumber > 0) {
             const remainder = currentNumber % toBase;
             const nextNumber = Math.floor(currentNumber / toBase);
@@ -351,14 +348,15 @@ function handleExplanation(event) {
             currentNumber = nextNumber;
         }
 
-        // Display steps in correct order (from the last step to the first)
+        // Loop to display the steps in the correct order (from bottom to top of the calculation)
         for(let i = steps.length - 1; i >= 0; i--) {
             const step = steps[i];
             explanationHTML += `<p>${data.expFromDecBody(step.current, toBase, step.next, step.remainder, digitsMap[step.remainder])}</p>`;
-            convertedNumber = digitsMap[step.remainder] + convertedNumber;
         }
 
-        explanationHTML += `<p><b>${data.expReadRemainders(convertedNumber)}</b></p>`;
+        // Use the already correct fromDecimal function to get the final result string
+        const finalResult = fromDecimal(decimalValue, toBase);
+        explanationHTML += `<p><b>${data.expReadRemainders(finalResult)}</b></p>`;
         if (toBase === 2) {
             explanationHTML += `<p><b>${data.expPaddedBinary(fromDecimal(decimalValue, 2, 8))}</b></p>`;
         }
