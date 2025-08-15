@@ -2,8 +2,15 @@
 // JavaScript functions adapted from the Python code
 // ====================================================================================
 
+/**
+ * Converts a number from a given base to decimal (base 10).
+ * @param {string} number - The number to convert.
+ * @param {number} base - The source base (2, 8, 10, or 16).
+ * @returns {number|null} The decimal value or null if the input is invalid.
+ */
 function toDecimal(number, base) {
     let decimalValue = 0;
+    // Reverse the digits to process from right to left
     const digits = String(number).toUpperCase().split('').reverse();
     const digitsMap = "0123456789ABCDEF";
 
@@ -15,14 +22,22 @@ function toDecimal(number, base) {
         } else {
             value = parseInt(digit);
         }
+        // Check for invalid digits for the given base
         if (isNaN(value) || value >= base) {
-            return null; // Invalid digit for the base
+            return null;
         }
         decimalValue += value * Math.pow(base, i);
     }
     return decimalValue;
 }
 
+/**
+ * Converts a decimal number to a specified base.
+ * @param {number} number - The decimal number to convert.
+ * @param {number} base - The target base (2, 8, or 16).
+ * @param {number|null} padToBits - Optional parameter to pad binary results with leading zeros.
+ * @returns {string} The converted number as a string.
+ */
 function fromDecimal(number, base, padToBits = null) {
     if (number === 0) {
         return (padToBits && base === 2) ? '0'.repeat(padToBits) : "0";
@@ -38,6 +53,7 @@ function fromDecimal(number, base, padToBits = null) {
         currentNumber = Math.floor(currentNumber / base);
     }
 
+    // Pad binary results if specified
     if (padToBits && base === 2) {
         return convertedNumber.padStart(padToBits, '0');
     }
@@ -49,6 +65,7 @@ function fromDecimal(number, base, padToBits = null) {
 // UI and Event Handlers
 // ====================================================================================
 
+// Object to store all multilingual text strings
 const langData = {
     en: {
         title: 'Base Converter',
@@ -59,9 +76,6 @@ const langData = {
         explanationTitle: 'Detailed Explanation',
         copySuccess: 'Copied to clipboard!',
         copyFail: 'Could not copy.',
-        shareText: 'Check out this base conversion: ',
-        shareSubject: 'Base Conversion Result',
-        shareBody: 'Here is the conversion result: ',
         invalidNumber: 'Invalid number. Please check the digits for the selected base.',
         binary: 'Binary',
         octal: 'Octal',
@@ -85,9 +99,6 @@ const langData = {
         explanationTitle: 'הסבר מפורט',
         copySuccess: 'הועתק ללוח!',
         copyFail: 'העתקה נכשלה.',
-        shareText: 'בדיקת המרת בסיס: ',
-        shareSubject: 'תוצאת המרת בסיס',
-        shareBody: 'הנה תוצאת ההמרה: ',
         invalidNumber: 'מספר לא חוקי. אנא בדוק את הספרות עבור הבסיס שנבחר.',
         binary: 'בינארי',
         octal: 'אוקטלי',
@@ -106,6 +117,9 @@ const langData = {
 
 let currentLang = 'en';
 
+/**
+ * Updates all UI text based on the current language setting.
+ */
 function updateUI() {
     const data = langData[currentLang];
     document.title = data.title;
@@ -120,29 +134,36 @@ function updateUI() {
     document.querySelector('.exp-btn[data-base="10"]').textContent = data.decimal;
     document.querySelector('.exp-btn[data-base="16"]').textContent = data.hex;
 
-    // Check for Hebrew to set text direction
+    // Show/hide usage instructions text based on language
     if (currentLang === 'he') {
         document.body.style.direction = 'rtl';
+        document.getElementById('usage-text-he').style.display = 'block';
+        document.getElementById('usage-text-en').style.display = 'none';
     } else {
         document.body.style.direction = 'ltr';
+        document.getElementById('usage-text-he').style.display = 'none';
+        document.getElementById('usage-text-en').style.display = 'block';
     }
 }
 
+// Attach event listeners when the document is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
     updateUI();
 
+    // Event listener for the "Convert" button
     document.getElementById('convert-btn').addEventListener('click', handleConversion);
+    // Event listener for the "Clear" button
     document.getElementById('clear-btn').addEventListener('click', clearAll);
+    // Event listener for the "Copy" button
     document.getElementById('copy-btn').addEventListener('click', copyResults);
-    document.getElementById('share-btn').addEventListener('click', shareResults);
 
+    // Event listeners for language buttons
     document.getElementById('lang-en').addEventListener('click', () => {
         currentLang = 'en';
         updateUI();
         document.getElementById('lang-en').classList.add('active');
         document.getElementById('lang-he').classList.remove('active');
     });
-
     document.getElementById('lang-he').addEventListener('click', () => {
         currentLang = 'he';
         updateUI();
@@ -150,29 +171,42 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('lang-en').classList.remove('active');
     });
 
+    // Event listeners for text size buttons
     document.getElementById('small-text').addEventListener('click', () => {
         document.getElementById('results').style.fontSize = '0.9em';
         document.getElementById('explanation-content').style.fontSize = '0.9em';
         updateTextSizeButtons('small-text');
     });
-
     document.getElementById('medium-text').addEventListener('click', () => {
         document.getElementById('results').style.fontSize = '1em';
         document.getElementById('explanation-content').style.fontSize = '1em';
         updateTextSizeButtons('medium-text');
     });
-
     document.getElementById('large-text').addEventListener('click', () => {
         document.getElementById('results').style.fontSize = '1.2em';
         document.getElementById('explanation-content').style.fontSize = '1.2em';
         updateTextSizeButtons('large-text');
     });
 
+    // Event listeners for explanation buttons
     document.querySelectorAll('.exp-btn').forEach(button => {
         button.addEventListener('click', handleExplanation);
     });
+
+    // Event listener for the new collapsible usage section
+    const usageToggle = document.getElementById('usage-toggle');
+    const usageContent = document.getElementById('usage-content');
+    
+    usageToggle.addEventListener('click', () => {
+        const isOpen = usageContent.classList.toggle('open');
+        usageToggle.classList.toggle('open', isOpen);
+    });
 });
 
+/**
+ * Updates the active class on the text size buttons.
+ * @param {string} activeId - The ID of the button to set as active.
+ */
 function updateTextSizeButtons(activeId) {
     document.querySelectorAll('.text-size-options button').forEach(btn => {
         btn.classList.remove('active');
@@ -180,12 +214,16 @@ function updateTextSizeButtons(activeId) {
     document.getElementById(activeId).classList.add('active');
 }
 
+/**
+ * Handles the main conversion process.
+ */
 function handleConversion() {
     const inputNumber = document.getElementById('input-number').value.trim();
     const fromBase = parseInt(document.getElementById('from-base').value);
     const resultsDiv = document.getElementById('results');
     const explanationSection = document.querySelector('.explanation-section');
 
+    // Validate the input number
     if (!validateInput(inputNumber, fromBase)) {
         resultsDiv.textContent = langData[currentLang].invalidNumber;
         explanationSection.style.display = 'none';
@@ -205,6 +243,7 @@ function handleConversion() {
         return;
     }
 
+    // Perform conversions to other bases
     const binary = fromDecimal(decimalValue, 2, 8);
     const octal = fromDecimal(decimalValue, 8);
     const hex = fromDecimal(decimalValue, 16);
@@ -220,6 +259,12 @@ function handleConversion() {
     explanationSection.style.display = 'block';
 }
 
+/**
+ * Validates the input number based on the selected base using regex.
+ * @param {string} number - The number string to validate.
+ * @param {number} base - The base to validate against.
+ * @returns {boolean} True if the input is valid, otherwise false.
+ */
 function validateInput(number, base) {
     if (!number) return false;
 
@@ -237,6 +282,10 @@ function validateInput(number, base) {
     }
 }
 
+/**
+ * Generates and displays the detailed conversion explanation.
+ * @param {Event} event - The click event from the explanation buttons.
+ */
 function handleExplanation(event) {
     const toBase = parseInt(event.target.dataset.base);
     const inputNumber = document.getElementById('input-number').value.trim();
@@ -264,7 +313,7 @@ function handleExplanation(event) {
     let explanationHTML = '';
     const data = langData[currentLang];
 
-    // Step 1: To Decimal
+    // Step 1: Conversion to Decimal
     if (fromBase !== 10) {
         explanationHTML += `<h4>${data.expToDecTitle(inputNumber, fromBase)}</h4>`;
         const digits = String(inputNumber).toUpperCase().split('').reverse();
@@ -286,7 +335,7 @@ function handleExplanation(event) {
         explanationHTML += `<p><b>${data.expFinalSum(sum)}</b></p>`;
     }
 
-    // Step 2: From Decimal
+    // Step 2: Conversion from Decimal
     if (toBase !== 10) {
         const digitsMap = "0123456789ABCDEF";
         explanationHTML += `<h4>${data.expFromDecTitle(decimalValue, toBase)}</h4>`;
@@ -302,7 +351,7 @@ function handleExplanation(event) {
             currentNumber = nextNumber;
         }
 
-        // Display steps in correct order
+        // Display steps in correct order (from the last step to the first)
         for(let i = steps.length - 1; i >= 0; i--) {
             const step = steps[i];
             explanationHTML += `<p>${data.expFromDecBody(step.current, toBase, step.next, step.remainder, digitsMap[step.remainder])}</p>`;
@@ -315,14 +364,17 @@ function handleExplanation(event) {
         }
     }
     
-    // Handle special case where from_base and to_base are the same
+    // Handle the special case where the source and target bases are the same
     if (fromBase === toBase) {
-        explanationHTML = `<p>${langData[currentLang].outputTitle} ${inputNumber} (${fromBase}) is already in the target base.</p>`;
+        explanationHTML = `<p>The number ${inputNumber} is already in base ${fromBase}.</p>`;
     }
 
     explanationContent.innerHTML = explanationHTML;
 }
 
+/**
+ * Clears all input and output fields.
+ */
 function clearAll() {
     document.getElementById('input-number').value = '';
     document.getElementById('results').textContent = '';
@@ -330,6 +382,9 @@ function clearAll() {
     document.querySelector('.explanation-section').style.display = 'none';
 }
 
+/**
+ * Copies the results to the clipboard.
+ */
 function copyResults() {
     const resultsText = document.getElementById('results').textContent;
     if (resultsText) {
@@ -338,30 +393,3 @@ function copyResults() {
             .catch(() => alert(langData[currentLang].copyFail));
     }
 }
-
-function shareResults() {
-    const resultsText = document.getElementById('results').textContent;
-    if (resultsText) {
-        const shareTitle = langData[currentLang].shareSubject;
-        const shareBody = langData[currentLang].shareBody + resultsText;
-
-        // Try using the Web Share API first
-        if (navigator.share) {
-            navigator.share({
-                title: shareTitle,
-                text: shareBody,
-            }).catch((error) => console.log('Error sharing', error));
-        } else {
-            // Fallback for browsers that don't support Web Share API
-            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareBody)}`;
-            const mailtoUrl = `mailto:?subject=${encodeURIComponent(shareTitle)}&body=${encodeURIComponent(shareBody)}`;
-            
-            if (confirm("Choose sharing option:\nOK for WhatsApp, Cancel for Email")) {
-                window.open(whatsappUrl, '_blank');
-            } else {
-                window.open(mailtoUrl, '_blank');
-            }
-        }
-    }
-}
-
