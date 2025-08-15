@@ -25,7 +25,14 @@ Body {
 header {
     text-align: center;
     margin-bottom: 30px;
-    position: relative;
+}
+
+/* New flex container for the header content */
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Allows items to wrap to a new line on small screens */
 }
 
 header h1 {
@@ -36,9 +43,9 @@ header h1 {
 
 /* Language selection buttons */
 .language-options {
-    position: absolute;
-    top: 0;
-    right: 0;
+    display: flex;
+    gap: 5px; /* Adds spacing between the buttons */
+    /* Absolute positioning has been removed to prevent overlapping */
 }
 
 .language-options button {
@@ -48,90 +55,42 @@ header h1 {
     padding: 5px 10px;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 0.9em;
-    margin-left: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
 }
 
+.language-options button:hover,
 .language-options button.active {
     background-color: #007bff;
     color: #fff;
     border-color: #007bff;
 }
 
-/* Styling for the new collapsible section */
-.explanation-container {
-    margin-bottom: 25px;
-    background: #f0f8ff;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #cce5ff;
-}
-
-/* Style for the collapsible heading */
-.collapsible-toggle {
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #004085;
-}
-
-/* Icon rotation for open/closed state */
-.collapsible-toggle i {
-    transition: transform 0.3s ease;
-}
-
-.collapsible-toggle.open i {
-    transform: rotate(180deg);
-}
-
-/* Container for the content, initially collapsed */
-.collapsible-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out;
-}
-
-/* Expanded state for the content */
-.collapsible-content.open {
-    max-height: 500px; /* Adjust as needed */
-    transition: max-height 0.3s ease-in;
-    margin-top: 15px;
-}
-
-.collapsible-content p {
-    margin: 0;
-    line-height: 1.8;
-}
-
-/* Main input section */
-.input-section {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-bottom: 25px;
-}
-
-.input-group {
+/* Main content layout */
+main {
     display: flex;
     flex-direction: column;
 }
 
-.input-group label {
-    margin-bottom: 5px;
-    font-weight: bold;
+.input-group,
+.output-section {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
     color: #555;
 }
 
 input[type="text"],
 select {
+    width: 100%;
     padding: 12px;
     border: 1px solid #ddd;
     border-radius: 8px;
     font-size: 1em;
-    width: 100%;
     box-sizing: border-box;
     transition: border-color 0.3s;
 }
@@ -142,54 +101,49 @@ select:focus {
     outline: none;
 }
 
-#convert-btn {
+.btn-primary {
+    display: block;
+    width: 100%;
+    padding: 12px;
     background-color: #007bff;
     color: #fff;
     border: none;
-    padding: 15px;
     border-radius: 8px;
     font-size: 1.1em;
+    font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.1s;
+    margin-top: 20px;
+    transition: background-color 0.3s;
 }
 
-#convert-btn:hover {
+.btn-primary:hover {
     background-color: #0056b3;
-}
-
-#convert-btn:active {
-    transform: scale(0.98);
-}
-
-/* Output and action buttons */
-.output-section {
-    border-top: 1px solid #eee;
-    padding-top: 25px;
 }
 
 .output-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
-.output-header h2 {
+.output-header h2,
+.explanation-section h3 {
     margin: 0;
-    font-size: 1.8em;
+    font-size: 1.4em;
     color: #1a1a1a;
 }
 
 .results-box {
-    background: #f9f9f9;
-    border: 1px solid #eee;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
     border-radius: 8px;
-    padding: 20px;
+    padding: 15px;
     min-height: 100px;
-    white-space: pre-wrap;
+    white-space: pre-wrap; /* Preserves whitespace and line breaks for formatted output */
     word-wrap: break-word;
-    font-size: 1em;
-    transition: font-size 0.2s;
+    font-family: monospace; /* Use a monospaced font for code-like output */
+    color: #343a40;
 }
 
 .action-buttons button {
@@ -241,35 +195,125 @@ select:focus {
 /* Explanation section for detailed steps */
 .explanation-section {
     margin-top: 30px;
-}
-
-.explanation-section h3 {
-    margin-top: 0;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
 }
 
 .explanation-options {
+    margin-top: 10px;
+    margin-bottom: 20px;
     display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 15px;
 }
 
-.exp-btn {
-    background-color: #e9ecef;
+.explanation-options button {
+    background: #007bff;
+    color: #fff;
     border: none;
-    padding: 10px 15px;
+    padding: 8px 15px;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 1em;
+    font-size: 0.9em;
     transition: background-color 0.3s;
 }
 
-.exp-btn:hover {
-    background-color: #ced4da;
+.explanation-options button:hover {
+    background-color: #0056b3;
 }
 
-.exp-btn.active {
-    background-color: #007bff;
-    color: #fff;
+#explanation-content p {
+    margin: 0 0 8px 0;
+    padding-left: 10px;
+    border-left: 3px solid #007bff;
+}
+
+#explanation-content p b {
+    color: #0056b3;
+}
+
+.explanation-section h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #007bff;
+    font-size: 1.2em;
+}
+
+/* Collapsible section for usage instructions */
+.explanation-container {
+    margin-bottom: 20px;
+}
+
+.collapsible-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #ccc;
+    transition: all 0.3s;
+}
+
+.collapsible-toggle:hover {
+    color: #007bff;
+    border-color: #007bff;
+}
+
+.collapsible-toggle.open {
+    border-bottom-color: #007bff;
+}
+
+.collapsible-toggle.open i {
+    transform: rotate(180deg);
+}
+
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.collapsible-content.open {
+    max-height: 500px; /* Adjust as needed */
+}
+
+/* Responsive design for mobile devices */
+@media (max-width: 480px) {
+    .container {
+        padding: 20px;
+    }
+    .header-content {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px; /* Space between the title and buttons */
+    }
+    .header-content h1 {
+        font-size: 1.8em;
+    }
+    .output-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    .action-buttons {
+        margin-top: 5px;
+    }
+    .explanation-options {
+        flex-direction: column;
+        gap: 5px;
+    }
+    .explanation-options button {
+        width: 100%;
+    }
+    .text-size-options {
+        text-align: center;
+    }
 }
