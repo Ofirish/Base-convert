@@ -17,6 +17,16 @@
             </div>
         </header>
 
+        <div class="collapsible-section">
+            <h3 class="collapsible-header" id="explanation-header">
+                <i class="fas fa-info-circle"></i> What is this page?
+                <i class="fas fa-chevron-down arrow-icon"></i>
+            </h3>
+            <div class="collapsible-content">
+                <p>This tool allows you to convert numbers between different number systems: Binary (Base 2), Octal (Base 8), Decimal (Base 10), and Hexadecimal (Base 16). Simply enter your number, select its current base from the dropdown, and press "Convert" to see the results in all other bases.</p>
+            </div>
+        </div>
+
         <main>
             <div class="input-section">
                 <div class="input-group">
@@ -40,12 +50,11 @@
                     <h2 id="output-title">Results:</h2>
                     <div class="action-buttons">
                         <button id="copy-btn" title="Copy to Clipboard"><i class="fas fa-copy"></i></button>
-                        <button id="share-btn" title="Share"><i class="fas fa-share-alt"></i></button>
                         <button id="clear-btn" title="Clear All"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </div>
                 <div class="results-box" id="results">
-                    </div>
+                </div>
                 <div class="text-size-options">
                     <button id="small-text">A</button>
                     <button id="medium-text" class="active">A</button>
@@ -53,7 +62,7 @@
                 </div>
             </div>
             
-            <div class="explanation-section" style="display: none;">
+            <div class="explanation-section">
                 <h3 id="explanation-title">Detailed Explanation</h3>
                 <div class="explanation-options">
                     <button class="exp-btn" data-base="2">Binary</button>
@@ -62,7 +71,7 @@
                     <button class="exp-btn" data-base="16">Hex</button>
                 </div>
                 <div id="explanation-content" class="results-box">
-                    </div>
+                </div>
             </div>
         </main>
     </div>
