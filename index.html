@@ -18,6 +18,33 @@
         </header>
 
         <main>
+            <div class="explanation-container">
+                <h2 id="usage-toggle" class="collapsible-toggle">
+                    Usage Instructions 
+                    <i class="fas fa-chevron-down"></i>
+                </h2>
+                <div id="usage-content" class="collapsible-content">
+                    <p id="usage-text-en">
+                        Welcome to the Base Converter!
+                        <br><br>
+                        To use this tool, simply enter a number in the input box. Select its current base (Binary, Octal, Decimal, or Hexadecimal) from the "Source Base" dropdown. Click "Convert" to see the number converted to all other bases.
+                        <br><br>
+                        For a detailed, step-by-step breakdown of how the conversion works, click on one of the base buttons in the "Detailed Explanation" section that appears after conversion.
+                        <br><br>
+                        You can also switch between English and Hebrew using the language buttons.
+                    </p>
+                    <p id="usage-text-he" style="display: none;">
+                        ברוכים הבאים לממיר הבסיסים!
+                        <br><br>
+                        כדי להשתמש בכלי, פשוט הזינו מספר בשדה הקלט. בחרו את הבסיס הנוכחי שלו (בינארי, אוקטלי, עשרוני או הקסדצימלי) מהרשימה "בסיס מקור". לחצו על "המר" כדי לראות את המספר מומר לכל הבסיסים האחרים.
+                        <br><br>
+                        להסבר מפורט, צעד אחר צעד, כיצד פועלת ההמרה, לחצו על אחד מכפתורי הבסיס בחלק "הסבר מפורט" שמופיע לאחר ההמרה.
+                        <br><br>
+                        ניתן גם לעבור בין אנגלית לעברית באמצעות כפתורי השפה.
+                    </p>
+                </div>
+            </div>
+
             <div class="input-section">
                 <div class="input-group">
                     <label for="input-number" id="label-number">Enter a number:</label>
@@ -28,7 +55,7 @@
                     <select id="from-base">
                         <option value="2">Binary (2)</option>
                         <option value="8">Octal (8)</option>
-                        <option value="10">Decimal (10)</option>
+                        <option value="10" selected>Decimal (10)</option>
                         <option value="16">Hexadecimal (16)</option>
                     </select>
                 </div>
@@ -40,12 +67,11 @@
                     <h2 id="output-title">Results:</h2>
                     <div class="action-buttons">
                         <button id="copy-btn" title="Copy to Clipboard"><i class="fas fa-copy"></i></button>
-                        <button id="share-btn" title="Share"><i class="fas fa-share-alt"></i></button>
                         <button id="clear-btn" title="Clear All"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </div>
                 <div class="results-box" id="results">
-                    </div>
+                </div>
                 <div class="text-size-options">
                     <button id="small-text">A</button>
                     <button id="medium-text" class="active">A</button>
@@ -62,7 +88,7 @@
                     <button class="exp-btn" data-base="16">Hex</button>
                 </div>
                 <div id="explanation-content" class="results-box">
-                    </div>
+                </div>
             </div>
         </main>
     </div>
