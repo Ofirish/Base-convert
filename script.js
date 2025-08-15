@@ -1,367 +1,248 @@
-// ====================================================================================
-// JavaScript functions adapted from the Python code
-// ====================================================================================
+// DOM Element References
+const inputNumber = document.getElementById('input-number');
+const fromBase = document.getElementById('from-base');
+const convertBtn = document.getElementById('convert-btn');
+const resultsDiv = document.getElementById('results');
+const copyBtn = document.getElementById('copy-btn');
+const clearBtn = document.getElementById('clear-btn');
+const smallTextBtn = document.getElementById('small-text');
+const mediumTextBtn = document.getElementById('medium-text');
+const largeTextBtn = document.getElementById('large-text');
+const langEnBtn = document.getElementById('lang-en');
+const langHeBtn = document.getElementById('lang-he');
+const explanationBtns = document.querySelectorAll('.exp-btn');
+const explanationContent = document.getElementById('explanation-content');
+const explanationHeader = document.getElementById('explanation-header');
+const collapsibleContent = document.querySelector('.collapsible-content');
 
-function toDecimal(number, base) {
-    let decimalValue = 0;
-    const digits = String(number).toUpperCase().split('').reverse();
-    const digitsMap = "0123456789ABCDEF";
+// --- Language and UI Elements ---
 
-    for (let i = 0; i < digits.length; i++) {
-        let digit = digits[i];
-        let value;
-        if (base === 16 && 'A' <= digit && digit <= 'F') {
-            value = digitsMap.indexOf(digit);
-        } else {
-            value = parseInt(digit);
-        }
-        if (isNaN(value) || value >= base) {
-            return null; // Invalid digit for the base
-        }
-        decimalValue += value * Math.pow(base, i);
-    }
-    return decimalValue;
-}
-
-function fromDecimal(number, base, padToBits = null) {
-    if (number === 0) {
-        return (padToBits && base === 2) ? '0'.repeat(padToBits) : "0";
-    }
-
-    const digitsMap = "0123456789ABCDEF";
-    let convertedNumber = "";
-    let currentNumber = number;
-
-    while (currentNumber > 0) {
-        let remainder = currentNumber % base;
-        convertedNumber = digitsMap[remainder] + convertedNumber;
-        currentNumber = Math.floor(currentNumber / base);
-    }
-
-    if (padToBits && base === 2) {
-        return convertedNumber.padStart(padToBits, '0');
-    }
-
-    return convertedNumber;
-}
-
-// ====================================================================================
-// UI and Event Handlers
-// ====================================================================================
-
-const langData = {
+// Language content object
+const translations = {
     en: {
-        title: 'Base Converter',
-        labelNumber: 'Enter a number:',
-        labelFromBase: 'Source Base:',
-        convertBtn: 'Convert',
-        outputTitle: 'Results:',
-        explanationTitle: 'Detailed Explanation',
-        copySuccess: 'Copied to clipboard!',
-        copyFail: 'Could not copy.',
-        shareText: 'Check out this base conversion: ',
-        shareSubject: 'Base Conversion Result',
-        shareBody: 'Here is the conversion result: ',
-        invalidNumber: 'Invalid number. Please check the digits for the selected base.',
-        binary: 'Binary',
-        octal: 'Octal',
-        decimal: 'Decimal',
-        hex: 'Hex',
-        // Detailed explanation strings
-        expToDecTitle: (num, base) => `✨ Converting '${num}' from base ${base} to decimal (base 10) ✨`,
-        expToDecBody: (digit, pos, value, base, term) => `  Digit '${digit}' at position ${pos}: ${value} * (${base}^${pos}) = ${term}`,
-        expFinalSum: (sum) => `  Final Sum: ${sum}`,
-        expFromDecTitle: (num, base) => `✨ Converting '${num}' from decimal (base 10) to base ${base} ✨`,
-        expFromDecBody: (current, base, next, rem, remDigit) => `  ${current} / ${base} = ${next} with a remainder of ${rem} (${remDigit})`,
-        expReadRemainders: (result) => `  Reading remainders from bottom to top: ${result}`,
-        expPaddedBinary: (result) => `  Padded to 8 bits: ${result}`,
+        pageTitle: "Base Converter",
+        labelNumber: "Enter a number:",
+        labelFromBase: "Source Base:",
+        convertBtn: "Convert",
+        outputTitle: "Results:",
+        copyBtnTitle: "Copy to Clipboard",
+        clearBtnTitle: "Clear All",
+        explanationTitle: "Detailed Explanation",
+        binaryExp: "Binary is a base-2 number system. It uses only two digits: 0 and 1. This system is the fundamental language of computers and digital electronics.",
+        octalExp: "Octal is a base-8 number system. It uses digits from 0 to 7. It is often used in computer programming as a more compact representation of binary numbers.",
+        decimalExp: "Decimal is the base-10 number system we use every day. It uses ten digits: 0 through 9. Each digit's position represents a power of 10.",
+        hexExp: "Hexadecimal is a base-16 number system. It uses sixteen digits: 0-9 and A-F. It is widely used in computing for memory addresses and color codes.",
+        placeholder: "e.g., 10110",
+        whatIsThis: "What is this page?",
+        collapsibleText: "This tool allows you to convert numbers between different number systems: Binary (Base 2), Octal (Base 8), Decimal (Base 10), and Hexadecimal (Base 16). Simply enter your number, select its current base from the dropdown, and press \"Convert\" to see the results in all other bases.",
+        invalidInput: "Invalid input. Please enter a valid number for the selected base."
     },
     he: {
-        title: 'ממיר בסיסים',
-        labelNumber: 'הכנס מספר:',
-        labelFromBase: 'בסיס מקור:',
-        convertBtn: 'המר',
-        outputTitle: 'תוצאות:',
-        explanationTitle: 'הסבר מפורט',
-        copySuccess: 'הועתק ללוח!',
-        copyFail: 'העתקה נכשלה.',
-        shareText: 'בדיקת המרת בסיס: ',
-        shareSubject: 'תוצאת המרת בסיס',
-        shareBody: 'הנה תוצאת ההמרה: ',
-        invalidNumber: 'מספר לא חוקי. אנא בדוק את הספרות עבור הבסיס שנבחר.',
-        binary: 'בינארי',
-        octal: 'אוקטלי',
-        decimal: 'עשרוני',
-        hex: 'הקסדצימלי',
-        // Detailed explanation strings
-        expToDecTitle: (num, base) => `✨ המרת '${num}' מבסיס ${base} לבסיס עשרוני (10) ✨`,
-        expToDecBody: (digit, pos, value, base, term) => `  הספרה '${digit}' במיקום ${pos}: ${value} * (${base}^${pos}) = ${term}`,
-        expFinalSum: (sum) => `  סיכום סופי: ${sum}`,
-        expFromDecTitle: (num, base) => `✨ המרת '${num}' מבסיס עשרוני (10) לבסיס ${base} ✨`,
-        expFromDecBody: (current, base, next, rem, remDigit) => `  ${current} / ${base} = ${next} עם שארית ${rem} (${remDigit})`,
-        expReadRemainders: (result) => `  קריאת השאריות מלמטה למעלה: ${result}`,
-        expPaddedBinary: (result) => `  מרופד ל-8 ביטים: ${result}`,
+        pageTitle: "ממיר בסיסים",
+        labelNumber: "הכנס מספר:",
+        labelFromBase: "בסיס מקור:",
+        convertBtn: "המר",
+        outputTitle: "תוצאות:",
+        copyBtnTitle: "העתק ללוח",
+        clearBtnTitle: "נקה הכל",
+        explanationTitle: "הסבר מפורט",
+        binaryExp: "בינארי הוא שיטת ספירה על בסיס 2. היא משתמשת בשתי ספרות בלבד: 0 ו-1. שיטה זו היא השפה הבסיסית של מחשבים ואלקטרוניקה דיגיטלית.",
+        octalExp: "אוקטלי הוא שיטת ספירה על בסיס 8. היא משתמשת בספרות מ-0 עד 7. היא משמשת לעיתים קרובות בתכנות כמייצג קומפקטי יותר של מספרים בינאריים.",
+        decimalExp: "עשרוני היא שיטת הספירה על בסיס 10 שאנו משתמשים בה מדי יום. היא משתמשת בעשר ספרות: 0 עד 9. מיקום כל ספרה מייצג חזקה של 10.",
+        hexExp: "הקסדצימלי הוא שיטת ספירה על בסיס 16. היא משתמשת בשש עשרה ספרות: 0-9 ו-A-F. היא נמצאת בשימוש נרחב במחשוב עבור כתובות זיכרון וקודי צבע.",
+        placeholder: "לדוגמה: 10110",
+        whatIsThis: "מהו הדף הזה?",
+        collapsibleText: "כלי זה מאפשר לך להמיר מספרים בין שיטות ספירה שונות: בינארי (בסיס 2), אוקטלי (בסיס 8), עשרוני (בסיס 10) והקסדצימלי (בסיס 16). כל שעליך לעשות הוא להזין את המספר שלך, לבחור את בסיס המקור שלו מהרשימה הנפתחת וללחוץ על 'המר' כדי לראות את התוצאות בכל שאר הבסיסים.",
+        invalidInput: "קלט לא חוקי. אנא הכנס מספר תקף עבור הבסיס שנבחר."
     }
 };
 
-let currentLang = 'en';
+let currentLanguage = 'en';
 
-function updateUI() {
-    const data = langData[currentLang];
-    document.title = data.title;
-    document.querySelector('h1').textContent = data.title;
-    document.getElementById('label-number').textContent = data.labelNumber;
-    document.getElementById('label-from-base').textContent = data.labelFromBase;
-    document.getElementById('convert-btn').textContent = data.convertBtn;
-    document.getElementById('output-title').textContent = data.outputTitle;
-    document.getElementById('explanation-title').textContent = data.explanationTitle;
-    document.querySelector('.exp-btn[data-base="2"]').textContent = data.binary;
-    document.querySelector('.exp-btn[data-base="8"]').textContent = data.octal;
-    document.querySelector('.exp-btn[data-base="10"]').textContent = data.decimal;
-    document.querySelector('.exp-btn[data-base="16"]').textContent = data.hex;
+// Function to update the UI based on the selected language
+function updateUI(lang) {
+    const content = translations[lang];
+    document.title = content.pageTitle;
+    document.getElementById('label-number').textContent = content.labelNumber;
+    document.getElementById('label-from-base').textContent = content.labelFromBase;
+    convertBtn.textContent = content.convertBtn;
+    document.getElementById('output-title').textContent = content.outputTitle;
+    copyBtn.title = content.copyBtnTitle;
+    clearBtn.title = content.clearBtnTitle;
+    document.getElementById('explanation-title').textContent = content.explanationTitle;
+    inputNumber.placeholder = content.placeholder;
+    document.getElementById('explanation-header').innerHTML = `<i class="fas fa-info-circle"></i> ${content.whatIsThis} <i class="fas fa-chevron-down arrow-icon"></i>`;
+    collapsibleContent.querySelector('p').textContent = content.collapsibleText;
 
-    // Check for Hebrew to set text direction
-    if (currentLang === 'he') {
-        document.body.style.direction = 'rtl';
-    } else {
-        document.body.style.direction = 'ltr';
+    // Handle RTL for Hebrew
+    document.documentElement.lang = lang;
+    document.body.dir = lang === 'he' ? 'rtl' : 'ltr';
+
+    // Update explanation section based on active button
+    const activeExpBtn = document.querySelector('.exp-btn.active');
+    if (activeExpBtn) {
+        showExplanation(activeExpBtn.dataset.base);
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    updateUI();
+// Event listeners for language buttons
+langEnBtn.addEventListener('click', () => {
+    currentLanguage = 'en';
+    langEnBtn.classList.add('active');
+    langHeBtn.classList.remove('active');
+    updateUI(currentLanguage);
+});
 
-    document.getElementById('convert-btn').addEventListener('click', handleConversion);
-    document.getElementById('clear-btn').addEventListener('click', clearAll);
-    document.getElementById('copy-btn').addEventListener('click', copyResults);
-    document.getElementById('share-btn').addEventListener('click', shareResults);
+langHeBtn.addEventListener('click', () => {
+    currentLanguage = 'he';
+    langHeBtn.classList.add('active');
+    langEnBtn.classList.remove('active');
+    updateUI(currentLanguage);
+});
 
-    document.getElementById('lang-en').addEventListener('click', () => {
-        currentLang = 'en';
-        updateUI();
-        document.getElementById('lang-en').classList.add('active');
-        document.getElementById('lang-he').classList.remove('active');
-    });
+// --- Collapsible Section Logic ---
 
-    document.getElementById('lang-he').addEventListener('click', () => {
-        currentLang = 'he';
-        updateUI();
-        document.getElementById('lang-he').classList.add('active');
-        document.getElementById('lang-en').classList.remove('active');
-    });
+explanationHeader.addEventListener('click', () => {
+    collapsibleContent.classList.toggle('show');
+    explanationHeader.classList.toggle('expanded');
+});
 
-    document.getElementById('small-text').addEventListener('click', () => {
-        document.getElementById('results').style.fontSize = '0.9em';
-        document.getElementById('explanation-content').style.fontSize = '0.9em';
-        updateTextSizeButtons('small-text');
-    });
+// --- Core Conversion Logic ---
 
-    document.getElementById('medium-text').addEventListener('click', () => {
-        document.getElementById('results').style.fontSize = '1em';
-        document.getElementById('explanation-content').style.fontSize = '1em';
-        updateTextSizeButtons('medium-text');
-    });
+// Function to validate the input number based on the source base
+function isValidInput(number, base) {
+    const validChars = {
+        '2': /^[01]+$/,
+        '8': /^[0-7]+$/,
+        '10': /^\d+$/,
+        '16': /^[0-9a-fA-F]+$/
+    };
+    return validChars[base].test(number);
+}
 
-    document.getElementById('large-text').addEventListener('click', () => {
-        document.getElementById('results').style.fontSize = '1.2em';
-        document.getElementById('explanation-content').style.fontSize = '1.2em';
-        updateTextSizeButtons('large-text');
-    });
+// Function to perform the conversion
+function convertNumber() {
+    const numberStr = inputNumber.value.trim();
+    const sourceBase = fromBase.value;
 
-    document.querySelectorAll('.exp-btn').forEach(button => {
-        button.addEventListener('click', handleExplanation);
+    // Clear previous results
+    resultsDiv.innerHTML = '';
+    
+    // Validate input
+    if (numberStr === '' || !isValidInput(numberStr, sourceBase)) {
+        resultsDiv.innerHTML = `<p class="error-message">${translations[currentLanguage].invalidInput}</p>`;
+        return;
+    }
+
+    let decimalValue;
+    try {
+        decimalValue = parseInt(numberStr, sourceBase);
+    } catch (e) {
+        resultsDiv.innerHTML = `<p class="error-message">${translations[currentLanguage].invalidInput}</p>`;
+        return;
+    }
+
+    // Convert to other bases and display
+    const bases = {
+        '2': 'Binary',
+        '8': 'Octal',
+        '10': 'Decimal',
+        '16': 'Hexadecimal'
+    };
+
+    let resultHtml = `<h4>Number: ${numberStr} (Base ${sourceBase})</h4>`;
+
+    for (const base in bases) {
+        if (base !== sourceBase) {
+            let convertedValue;
+            if (base === '16') {
+                convertedValue = decimalValue.toString(base).toUpperCase();
+            } else {
+                convertedValue = decimalValue.toString(base);
+            }
+            resultHtml += `<p><b>${bases[base]} (${base}):</b> ${convertedValue}</p>`;
+        }
+    }
+
+    resultsDiv.innerHTML = resultHtml;
+}
+
+// Event listener for the convert button
+convertBtn.addEventListener('click', convertNumber);
+
+// --- Action Buttons (Copy & Clear) ---
+
+// Copy results to clipboard
+copyBtn.addEventListener('click', () => {
+    const textToCopy = resultsDiv.innerText;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        alert('Results copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
     });
 });
 
-function updateTextSizeButtons(activeId) {
-    document.querySelectorAll('.text-size-options button').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    document.getElementById(activeId).classList.add('active');
-}
-
-function handleConversion() {
-    const inputNumber = document.getElementById('input-number').value.trim();
-    const fromBase = parseInt(document.getElementById('from-base').value);
-    const resultsDiv = document.getElementById('results');
-    const explanationSection = document.querySelector('.explanation-section');
-
-    if (!validateInput(inputNumber, fromBase)) {
-        resultsDiv.textContent = langData[currentLang].invalidNumber;
-        explanationSection.style.display = 'none';
-        return;
-    }
-
-    let decimalValue;
-    if (fromBase === 10) {
-        decimalValue = parseInt(inputNumber);
-    } else {
-        decimalValue = toDecimal(inputNumber, fromBase);
-    }
-
-    if (decimalValue === null) {
-        resultsDiv.textContent = langData[currentLang].invalidNumber;
-        explanationSection.style.display = 'none';
-        return;
-    }
-
-    const binary = fromDecimal(decimalValue, 2, 8);
-    const octal = fromDecimal(decimalValue, 8);
-    const hex = fromDecimal(decimalValue, 16);
-
-    const output = `
-  Decimal: ${decimalValue}
-  Binary:  ${binary}
-  Octal:   ${octal}
-  Hex:     ${hex}
-    `;
-
-    resultsDiv.textContent = output;
-    explanationSection.style.display = 'block';
-}
-
-function validateInput(number, base) {
-    if (!number) return false;
-
-    switch (base) {
-        case 2:
-            return /^[01]+$/.test(number);
-        case 8:
-            return /^[0-7]+$/.test(number);
-        case 10:
-            return /^[0-9]+$/.test(number);
-        case 16:
-            return /^[0-9A-Fa-f]+$/.test(number);
-        default:
-            return false;
-    }
-}
-
-function handleExplanation(event) {
-    const toBase = parseInt(event.target.dataset.base);
-    const inputNumber = document.getElementById('input-number').value.trim();
-    const fromBase = parseInt(document.getElementById('from-base').value);
-    const explanationContent = document.getElementById('explanation-content');
+// Clear all fields
+clearBtn.addEventListener('click', () => {
+    inputNumber.value = '';
+    fromBase.value = '2';
+    resultsDiv.innerHTML = '';
     explanationContent.innerHTML = '';
-    
-    if (!validateInput(inputNumber, fromBase)) {
-        explanationContent.textContent = langData[currentLang].invalidNumber;
-        return;
-    }
+    explanationBtns.forEach(btn => btn.classList.remove('active'));
+});
 
-    let decimalValue;
-    if (fromBase === 10) {
-        decimalValue = parseInt(inputNumber);
-    } else {
-        decimalValue = toDecimal(inputNumber, fromBase);
-    }
+// --- Text Size Adjustment ---
 
-    if (decimalValue === null) {
-        explanationContent.textContent = langData[currentLang].invalidNumber;
-        return;
-    }
+const textSizes = [smallTextBtn, mediumTextBtn, largeTextBtn];
+textSizes.forEach(btn => {
+    btn.addEventListener('click', () => {
+        textSizes.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
 
-    let explanationHTML = '';
-    const data = langData[currentLang];
-
-    // Step 1: To Decimal
-    if (fromBase !== 10) {
-        explanationHTML += `<h4>${data.expToDecTitle(inputNumber, fromBase)}</h4>`;
-        const digits = String(inputNumber).toUpperCase().split('').reverse();
-        let sum = 0;
-        const digitsMap = "0123456789ABCDEF";
-
-        for (let i = 0; i < digits.length; i++) {
-            const digit = digits[i];
-            let value;
-            if (fromBase === 16 && 'A' <= digit && digit <= 'F') {
-                value = digitsMap.indexOf(digit);
-            } else {
-                value = parseInt(digit);
-            }
-            const term = value * Math.pow(fromBase, i);
-            sum += term;
-            explanationHTML += `<p>${data.expToDecBody(digit, i, value, fromBase, term)}</p>`;
-        }
-        explanationHTML += `<p><b>${data.expFinalSum(sum)}</b></p>`;
-    }
-
-    // Step 2: From Decimal
-    if (toBase !== 10) {
-        const digitsMap = "0123456789ABCDEF";
-        explanationHTML += `<h4>${data.expFromDecTitle(decimalValue, toBase)}</h4>`;
+        resultsDiv.classList.remove('small-text', 'medium-text', 'large-text');
         
-        let currentNumber = decimalValue;
-        let convertedNumber = "";
-        let steps = [];
-
-        while (currentNumber > 0) {
-            const remainder = currentNumber % toBase;
-            const nextNumber = Math.floor(currentNumber / toBase);
-            steps.push({ current: currentNumber, next: nextNumber, remainder: remainder });
-            currentNumber = nextNumber;
+        if (btn.id === 'small-text') {
+            resultsDiv.classList.add('small-text');
+        } else if (btn.id === 'medium-text') {
+            resultsDiv.classList.add('medium-text');
+        } else if (btn.id === 'large-text') {
+            resultsDiv.classList.add('large-text');
         }
+    });
+});
 
-        // Display steps in correct order
-        for(let i = steps.length - 1; i >= 0; i--) {
-            const step = steps[i];
-            explanationHTML += `<p>${data.expFromDecBody(step.current, toBase, step.next, step.remainder, digitsMap[step.remainder])}</p>`;
-            convertedNumber = digitsMap[step.remainder] + convertedNumber;
-        }
+// --- Detailed Explanation ---
 
-        explanationHTML += `<p><b>${data.expReadRemainders(convertedNumber)}</b></p>`;
-        if (toBase === 2) {
-            explanationHTML += `<p><b>${data.expPaddedBinary(fromDecimal(decimalValue, 2, 8))}</b></p>`;
-        }
+// Function to show the detailed explanation
+function showExplanation(base) {
+    let explanation;
+    switch (base) {
+        case '2':
+            explanation = translations[currentLanguage].binaryExp;
+            break;
+        case '8':
+            explanation = translations[currentLanguage].octalExp;
+            break;
+        case '10':
+            explanation = translations[currentLanguage].decimalExp;
+            break;
+        case '16':
+            explanation = translations[currentLanguage].hexExp;
+            break;
+        default:
+            explanation = '';
     }
-    
-    // Handle special case where from_base and to_base are the same
-    if (fromBase === toBase) {
-        explanationHTML = `<p>${langData[currentLang].outputTitle} ${inputNumber} (${fromBase}) is already in the target base.</p>`;
-    }
-
-    explanationContent.innerHTML = explanationHTML;
+    explanationContent.textContent = explanation;
 }
 
-function clearAll() {
-    document.getElementById('input-number').value = '';
-    document.getElementById('results').textContent = '';
-    document.getElementById('explanation-content').innerHTML = '';
-    document.querySelector('.explanation-section').style.display = 'none';
-}
+// Event listeners for explanation buttons
+explanationBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        explanationBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        showExplanation(btn.dataset.base);
+    });
+});
 
-function copyResults() {
-    const resultsText = document.getElementById('results').textContent;
-    if (resultsText) {
-        navigator.clipboard.writeText(resultsText)
-            .then(() => alert(langData[currentLang].copySuccess))
-            .catch(() => alert(langData[currentLang].copyFail));
-    }
-}
-
-function shareResults() {
-    const resultsText = document.getElementById('results').textContent;
-    if (resultsText) {
-        const shareTitle = langData[currentLang].shareSubject;
-        const shareBody = langData[currentLang].shareBody + resultsText;
-
-        // Try using the Web Share API first
-        if (navigator.share) {
-            navigator.share({
-                title: shareTitle,
-                text: shareBody,
-            }).catch((error) => console.log('Error sharing', error));
-        } else {
-            // Fallback for browsers that don't support Web Share API
-            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareBody)}`;
-            const mailtoUrl = `mailto:?subject=${encodeURIComponent(shareTitle)}&body=${encodeURIComponent(shareBody)}`;
-            
-            if (confirm("Choose sharing option:\nOK for WhatsApp, Cancel for Email")) {
-                window.open(whatsappUrl, '_blank');
-            } else {
-                window.open(mailtoUrl, '_blank');
-            }
-        }
-    }
-}
-
+// Initial UI setup
+updateUI(currentLanguage);
