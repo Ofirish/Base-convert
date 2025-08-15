@@ -353,7 +353,7 @@ function handleExplanation(event) {
             const step = steps[i];
             explanationHTML += `<p>${data.expFromDecBody(step.current, toBase, step.next, step.remainder, digitsMap[step.remainder])}</p>`;
         }
-
+        
         // Use the already correct fromDecimal function to get the final result string
         const finalResult = fromDecimal(decimalValue, toBase);
         explanationHTML += `<p><b>${data.expReadRemainders(finalResult)}</b></p>`;
