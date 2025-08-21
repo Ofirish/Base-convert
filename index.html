@@ -4,8 +4,405 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Base Converter</title>
-    <link rel="stylesheet" href="style.css">
+    <!-- Tailwind CSS CDN for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Import Inter font from Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        /* General styling for the body */
+        body {
+            font-family: 'Inter', sans-serif; /* Using Inter font */
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased; /* Smoother font rendering */
+            -moz-osx-font-smoothing: grayscale; /* Smoother font rendering */
+        }
+
+        /* Container for the entire application */
+        .container {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* New flex container for the header content */
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* Allows items to wrap to a new line on small screens */
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.2em;
+            color: #1a1a1a;
+        }
+
+        /* Language selection buttons */
+        .language-options {
+            display: flex;
+            gap: 5px; /* Adds spacing between the buttons */
+        }
+
+        .language-options button {
+            background: none;
+            border: 1px solid #ccc;
+            color: #555;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .language-options button:hover,
+        .language-options button.active {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+
+        /* Main content layout */
+        main {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group,
+        .output-section {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .btn-primary {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .output-header h2,
+        .explanation-section h3 {
+            margin: 0;
+            font-size: 1.4em;
+            color: #1a1a1a;
+        }
+
+        .results-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 100px;
+            white-space: pre-wrap; /* Preserves whitespace and line breaks for formatted output */
+            word-wrap: break-word;
+            font-family: monospace; /* Use a monospaced font for code-like output */
+            color: #343a40;
+        }
+
+        .action-buttons button {
+            background: #e9ecef;
+            border: none;
+            color: #555;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-left: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .action-buttons button:hover {
+            background-color: #ced4da;
+        }
+
+        .action-buttons i {
+            font-size: 1.1em;
+        }
+
+        .text-size-options {
+            text-align: right;
+            margin-top: 15px;
+        }
+
+        .text-size-options button {
+            background: none;
+            border: 1px solid #ccc;
+            color: #555;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 5px;
+            transition: all 0.2s;
+        }
+
+        .text-size-options button#small-text { font-size: 0.8em; }
+        .text-size-options button#medium-text { font-size: 1em; }
+        .text-size-options button#large-text { font-size: 1.2em; }
+
+        .text-size-options button.active {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+
+        /* Explanation section for detailed steps */
+        .explanation-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .explanation-options {
+            margin-top: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .explanation-options button {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+
+        .explanation-options button:hover {
+            background-color: #0056b3;
+        }
+
+        #explanation-content p {
+            margin: 0 0 8px 0;
+            padding-left: 10px;
+            border-left: 3px solid #007bff;
+        }
+
+        #explanation-content p b {
+            color: #0056b3;
+        }
+
+        .explanation-section h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #007bff;
+            font-size: 1.2em;
+        }
+
+        /* Collapsible section for usage instructions */
+        .explanation-container {
+            margin-bottom: 20px;
+        }
+
+        .collapsible-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #ccc;
+            transition: all 0.3s;
+        }
+
+        .collapsible-toggle:hover {
+            color: #007bff;
+            border-color: #007bff;
+        }
+
+        .collapsible-toggle.open {
+            border-bottom-color: #007bff;
+        }
+
+        .collapsible-toggle.open i {
+            transform: rotate(180deg);
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+
+        .collapsible-content.open {
+            max-height: 500px; /* Adjust as needed, a large enough value to accommodate content */
+        }
+
+        /* Custom message box for alerts */
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #333;
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .message-box.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Responsive design for mobile devices */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            .header-content {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px; /* Space between the title and buttons */
+            }
+            .header-content h1 {
+                font-size: 1.8em;
+            }
+            .output-header {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            .action-buttons {
+                margin-top: 5px;
+            }
+            .explanation-options {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .explanation-options button {
+                width: 100%;
+            }
+            .text-size-options {
+                text-align: center;
+            }
+            .explanation-copy-buttons {
+                flex-direction: column; /* Stack buttons vertically on small screens */
+            }
+        }
+
+        /* Table styling for binary explanation */
+        .binary-conversion-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .binary-conversion-table th,
+        .binary-conversion-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .binary-conversion-table th {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+
+        .binary-conversion-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .explanation-copy-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+        .explanation-copy-buttons button {
+            background-color: #6c757d; /* A secondary button color */
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+        .explanation-copy-buttons button:hover {
+            background-color: #5a6268;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -91,9 +488,792 @@
                 </div>
                 <div id="explanation-content" class="results-box">
                 </div>
+                <div class="explanation-copy-buttons">
+                    <button id="copy-explanation-btn"><i class="fas fa-copy"></i> <span id="copy-full-exp-text">Copy Full Explanation</span></button>
+                    <button id="copy-csv-table-btn" style="display:none;"><i class="fas fa-table"></i> <span id="copy-csv-table-text">Copy Binary Table CSV</span></button>
+                </div>
             </div>
         </main>
     </div>
-    <script src="script.js"></script>
+
+    <!-- Custom message box element -->
+    <div id="message-box" class="message-box"></div>
+
+    <script>
+        // ====================================================================================
+        // JavaScript functions adapted from the Python code
+        // ====================================================================================
+
+        /**
+         * Converts a number from a given base to decimal (base 10).
+         * @param {string} number - The number to convert.
+         * @param {number} base - The source base (2, 8, 10, or 16).
+         * @returns {number|null} The decimal value or null if the input is invalid.
+         */
+        function toDecimal(number, base) {
+            let decimalValue = 0;
+            // Reverse the digits to process from right to left, which corresponds to
+            // increasing powers of the base (e.g., 10^0, 10^1, etc.).
+            const digits = String(number).toUpperCase().split('').reverse();
+            const digitsMap = "0123456789ABCDEF";
+
+            for (let i = 0; i < digits.length; i++) {
+                let digit = digits[i];
+                let value;
+                // Handle hexadecimal digits 'A' through 'F'
+                if (base === 16 && 'A' <= digit && digit <= 'F') {
+                    value = digitsMap.indexOf(digit);
+                } else {
+                    value = parseInt(digit);
+                }
+                // Check for invalid digits for the given base (e.g., a '2' in a binary number)
+                if (isNaN(value) || value >= base) {
+                    return null;
+                }
+                // Calculate the value of the current digit and add it to the total
+                decimalValue += value * Math.pow(base, i);
+            }
+            return decimalValue;
+        }
+
+        /**
+         * Converts a decimal number to a specified base.
+         * @param {number} number - The decimal number to convert.
+         * @param {number} base - The target base (2, 8, or 16).
+         * @param {number|null} padToBits - Optional parameter to pad binary results with leading zeros.
+         * @returns {string} The converted number as a string.
+         */
+        function fromDecimal(number, base, padToBits = null) {
+            // Handle the special case where the number is 0
+            if (number === 0) {
+                return (padToBits && base === 2) ?
+                    '0'.repeat(padToBits) : "0";
+            }
+
+            const digitsMap = "0123456789ABCDEF";
+            let convertedNumber = "";
+            let currentNumber = number;
+            // Use repeated division and remainder to get the digits
+            while (currentNumber > 0) {
+                let remainder = currentNumber % base;
+                // Prepend the new digit to the string to build the number in the correct order
+                convertedNumber = digitsMap[remainder] + convertedNumber;
+                currentNumber = Math.floor(currentNumber / base);
+            }
+
+            // Pad binary results if specified (e.g., for 8-bit representation)
+            if (padToBits && base === 2) {
+                return convertedNumber.padStart(padToBits, '0');
+            }
+
+            return convertedNumber;
+        }
+
+        // ====================================================================================
+        // UI and Event Handlers
+        // ====================================================================================
+
+        // Object to store all multilingual text strings
+        const langData = {
+            en: {
+                title: 'Base Converter',
+                labelNumber: 'Enter a number:',
+                labelFromBase: 'Source Base:',
+                convertBtn: 'Convert',
+                outputTitle: 'Results:',
+                explanationTitle: 'Detailed Explanation',
+                copySuccess: 'Copied to clipboard!',
+                copyFail: 'Could not copy.',
+                invalidNumber: 'Invalid number. Please check the digits for the selected base.',
+                binary: 'Binary',
+                octal: 'Octal',
+                decimal: 'Decimal',
+                hex: 'Hexadecimal',
+                // Detailed explanation strings
+                expToDecTitle: (num, base) => `✨ Converting '${num}' from base ${base} to decimal (base 10) ✨`,
+                expToDecBody: (digit, pos, value, base, term) => `  Digit '${digit}' at position ${pos}: ${value} * (${base}^${pos}) = ${term}`,
+                expFinalSum: (sum) => `  Final Sum: ${sum}`,
+                expFromDecTitle: (num, base) => `✨ Converting '${num}' from decimal (base 10) to base ${base} ✨`,
+                expFromDecBody: (current, base, next, rem, remDigit) => `  ${current} / ${base} = ${next} with a remainder of ${rem} (${remDigit})`,
+                expReadRemainders: (result) => `  Reading remainders from bottom to top: ${result}`,
+                expPaddedBinary: (result) => `  Padded to 8 bits: ${result}`,
+                binaryTableTitle: (decimal) => `Binary Conversion Table for ${decimal}`,
+                binaryTablePowers: (power) => `2^${power}`, // Plain text version for ASCII table
+                copyFullExp: 'Copy Full Explanation', // New string for copy button
+                copyCsvTable: 'Copy Binary Table CSV', // New string for CSV button
+            },
+            he: {
+                title: 'ממיר בסיסים',
+                labelNumber: 'הכנס מספר:',
+                labelFromBase: 'בסיס מקור:',
+                convertBtn: 'המר',
+                outputTitle: 'תוצאות:',
+                explanationTitle: 'הסבר מפורט',
+                copySuccess: 'הועתק ללוח!',
+                copyFail: 'העתקה נכשלה.',
+                invalidNumber: 'מספר לא חוקי. אנא בדוק את הספרות עבור הבסיס שנבחר.',
+                binary: 'בינארי',
+                octal: 'אוקטלי',
+                decimal: 'עשרוני',
+                hex: 'הקסדצימלי',
+                // Detailed explanation strings
+                expToDecTitle: (num, base) => `✨ המרת '${num}' מבסיס ${base} לבסיס עשרוני (10) ✨`,
+                expToDecBody: (digit, pos, value, base, term) => `  הספרה '${digit}' במיקום ${pos}: ${value} * (${base}^${pos}) = ${term}`,
+                expFinalSum: (sum) => `  סיכום סופי: ${sum}`,
+                expFromDecTitle: (num, base) => `✨ המרת '${num}' מבסיס עשרוני (10) לבסיס ${base} ✨`,
+                expFromDecBody: (current, base, next, rem, remDigit) => `  ${current} / ${base} = ${next} עם שארית ${rem} (${remDigit})`,
+                expReadRemainders: (result) => `  קריאת השאריות מלמטה למעלה: ${result}`,
+                expPaddedBinary: (result) => `  מרופד ל-8 ביטים: ${result}`,
+                binaryTableTitle: (decimal) => `טבלת המרה לבינארי עבור ${decimal}`,
+                binaryTablePowers: (power) => `2^${power}`, // Plain text version for ASCII table
+                copyFullExp: 'העתק הסבר מלא', // New string for copy button
+                copyCsvTable: 'העתק טבלת בינארי כ-CSV', // New string for CSV button
+            }
+        };
+        let currentLang = 'en';
+
+        // Global variables to store the last explanation state for re-rendering
+        let lastInputNumberForExplanation = '';
+        let lastFromBaseForExplanation = 10;
+        let lastToExplainBase = null; // Stores the data-base value of the last clicked explanation button
+
+        // Global variables to hold the content for copying
+        let currentPlainTextExplanation = '';
+        let currentCsvTableData = null;
+
+        // Get the message box element
+        const messageBox = document.getElementById('message-box');
+
+        /**
+         * Displays a temporary message in a custom message box.
+         * @param {string} message - The message to display.
+         * @param {number} duration - The duration in milliseconds to display the message.
+         */
+        function showMessageBox(message, duration = 2000) {
+            messageBox.textContent = message;
+            messageBox.classList.add('show');
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, duration);
+        }
+
+        /**
+         * Updates all UI text based on the current language setting.
+         */
+        function updateUI() {
+            const data = langData[currentLang];
+            document.title = data.title;
+            document.querySelector('h1').textContent = data.title;
+            document.getElementById('label-number').textContent = data.labelNumber;
+            document.getElementById('label-from-base').textContent = data.labelFromBase;
+            document.getElementById('convert-btn').textContent = data.convertBtn;
+            document.getElementById('output-title').textContent = data.outputTitle;
+            document.getElementById('explanation-title').textContent = data.explanationTitle;
+            document.querySelector('.exp-btn[data-base="2"]').textContent = data.binary;
+            document.querySelector('.exp-btn[data-base="8"]').textContent = data.octal;
+            document.querySelector('.exp-btn[data-base="10"]').textContent = data.decimal;
+            document.querySelector('.exp-btn[data-base="16"]').textContent = data.hex;
+
+            // Update new copy button texts
+            document.getElementById('copy-full-exp-text').textContent = data.copyFullExp;
+            document.getElementById('copy-csv-table-text').textContent = data.copyCsvTable;
+
+
+            // Show/hide usage instructions text based on language and adjust text direction
+            if (currentLang === 'he') {
+                document.body.style.direction = 'rtl';
+                document.getElementById('usage-text-he').style.display = 'block';
+                document.getElementById('usage-text-en').style.display = 'none';
+            } else {
+                document.body.style.direction = 'ltr';
+                document.getElementById('usage-text-he').style.display = 'none';
+                document.getElementById('usage-text-en').style.display = 'block';
+            }
+
+            // Re-generate the detailed explanation if it was previously displayed
+            if (document.querySelector('.explanation-section').style.display === 'block' && lastToExplainBase !== null) {
+                // Trigger generateExplanation directly with stored values
+                generateExplanation(lastInputNumberForExplanation, lastFromBaseForExplanation, lastToExplainBase);
+            }
+        }
+
+        // Attach event listeners when the document is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUI();
+
+            // Event listener for the "Convert" button
+            document.getElementById('convert-btn').addEventListener('click', handleConversion);
+            // Event listener for the "Clear" button
+            document.getElementById('clear-btn').addEventListener('click', clearAll);
+            // Event listener for the "Copy" button
+            document.getElementById('copy-btn').addEventListener('click', copyResults);
+            // Event listener for "Copy Full Explanation" button
+            document.getElementById('copy-explanation-btn').addEventListener('click', copyExplanationContents);
+            // Event listener for "Copy Binary Table CSV" button
+            document.getElementById('copy-csv-table-btn').addEventListener('click', copyBinaryTableAsCsv);
+
+
+            // Event listeners for language buttons
+            document.getElementById('lang-en').addEventListener('click', () => {
+                currentLang = 'en';
+                document.getElementById('lang-en').classList.add('active');
+                document.getElementById('lang-he').classList.remove('active');
+                updateUI(); // updateUI will now handle re-rendering the explanation
+            });
+            document.getElementById('lang-he').addEventListener('click', () => {
+                currentLang = 'he';
+                document.getElementById('lang-he').classList.add('active');
+                document.getElementById('lang-en').classList.remove('active');
+                updateUI(); // updateUI will now handle re-rendering the explanation
+            });
+
+            // Event listeners for text size buttons
+            document.getElementById('small-text').addEventListener('click', () => {
+                document.getElementById('results').style.fontSize = '0.9em';
+                document.getElementById('explanation-content').style.fontSize = '0.9em';
+                updateTextSizeButtons('small-text');
+            });
+            document.getElementById('medium-text').addEventListener('click', () => {
+                document.getElementById('results').style.fontSize = '1em';
+                document.getElementById('explanation-content').style.fontSize = '1em';
+                updateTextSizeButtons('medium-text');
+            });
+            document.getElementById('large-text').addEventListener('click', () => {
+                document.getElementById('results').style.fontSize = '1.2em';
+                document.getElementById('explanation-content').style.fontSize = '1.2em';
+                updateTextSizeButtons('large-text');
+            });
+            // Event listeners for explanation buttons
+            document.querySelectorAll('.exp-btn').forEach(button => {
+                button.addEventListener('click', handleExplanation);
+            });
+            // Event listener for the new collapsible usage section
+            const usageToggle = document.getElementById('usage-toggle');
+            const usageContent = document.getElementById('usage-content');
+            usageToggle.addEventListener('click', () => {
+                const isOpen = usageContent.classList.toggle('open');
+                usageToggle.classList.toggle('open', isOpen);
+            });
+        });
+
+        /**
+         * Updates the active class on the text size buttons.
+         * @param {string} activeId - The ID of the button to set as active.
+         */
+        function updateTextSizeButtons(activeId) {
+            document.querySelectorAll('.text-size-options button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(activeId).classList.add('active');
+        }
+
+        /**
+         * Handles the main conversion process.
+         */
+        function handleConversion() {
+            const inputNumber = document.getElementById('input-number').value.trim();
+            const fromBase = parseInt(document.getElementById('from-base').value);
+            const resultsDiv = document.getElementById('results');
+            const explanationSection = document.querySelector('.explanation-section');
+            // Validate the input number using regex
+            if (!validateInput(inputNumber, fromBase)) {
+                resultsDiv.textContent = langData[currentLang].invalidNumber;
+                explanationSection.style.display = 'none';
+                return;
+            }
+
+            let decimalValue;
+            // Handle case where source base is already decimal
+            if (fromBase === 10) {
+                decimalValue = parseInt(inputNumber);
+            } else {
+                decimalValue = toDecimal(inputNumber, fromBase);
+            }
+
+            if (decimalValue === null) {
+                resultsDiv.textContent = langData[currentLang].invalidNumber;
+                explanationSection.style.display = 'none';
+                return;
+            }
+
+            // Perform conversions to other bases and format the output
+            const binary = fromDecimal(decimalValue, 2, 8);
+            const octal = fromDecimal(decimalValue, 8);
+            const hex = fromDecimal(decimalValue, 16);
+            const output = `
+ Decimal: ${decimalValue}
+ Binary:  ${binary}
+ Octal:   ${octal}
+ Hex:     ${hex}
+            `;
+            resultsDiv.textContent = output;
+            explanationSection.style.display = 'block';
+        }
+
+        /**
+         * Validates the input number based on the selected base using regex.
+         * @param {string} number - The number string to validate.
+         * @param {number} base - The base to validate against.
+         * @returns {boolean} True if the input is valid, otherwise false.
+         */
+        function validateInput(number, base) {
+            if (!number) return false;
+            // Handle empty input or input that is just a sign
+            if (number === '-' || number === '+') return false;
+
+            switch (base) {
+                case 2:
+                    return /^[01]+$/.test(number);
+                case 8:
+                    return /^[0-7]+$/.test(number);
+                case 10:
+                    // Allow optional leading '+' or '-' for decimal
+                    return /^-?[0-9]+$/.test(number);
+                case 16:
+                    return /^[0-9A-Fa-f]+$/.test(number);
+                default:
+                    return false;
+            }
+        }
+
+        /**
+         * Helper function to remove emojis from a string.
+         * @param {string} str - The input string.
+         * @returns {string} The string with emojis removed.
+         */
+        function removeEmojis(str) {
+            // This regex matches various emoji categories
+            const emojiRegex = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;
+            return str.replace(emojiRegex, '');
+        }
+
+        /**
+         * Generates and displays the detailed conversion explanation.
+         * This function is now responsible for the core logic of explanation generation.
+         * @param {string} inputNum - The input number string.
+         * @param {number} srcBase - The source base.
+         * @param {number} targetBase - The target base for explanation.
+         */
+        function generateExplanation(inputNum, srcBase, targetBase) {
+            const explanationContent = document.getElementById('explanation-content');
+            const explanationSection = document.querySelector('.explanation-section'); // Get the section element
+            explanationContent.innerHTML = ''; // Clear previous content
+            
+            // Ensure the explanation section is visible when an explanation is generated
+            explanationSection.style.display = 'block';
+
+            // Hide CSV button by default
+            document.getElementById('copy-csv-table-btn').style.display = 'none';
+            currentCsvTableData = null; // Clear previous CSV data
+
+            // Define digitsMap here to be accessible within this function's scope
+            const digitsMap = "0123456789ABCDEF";
+
+            if (!validateInput(inputNum, srcBase)) {
+                explanationContent.textContent = langData[currentLang].invalidNumber;
+                currentPlainTextExplanation = langData[currentLang].invalidNumber;
+                return;
+            }
+
+            let decimalValue;
+            if (srcBase === 10) {
+                decimalValue = parseInt(inputNum);
+            } else {
+                decimalValue = toDecimal(inputNum, srcBase);
+            }
+
+            if (decimalValue === null) {
+                explanationContent.textContent = langData[currentLang].invalidNumber;
+                currentPlainTextExplanation = langData[currentLang].invalidNumber;
+                return;
+            }
+
+            let explanationHTML = '';
+            let plainTextContent = '';
+            const data = langData[currentLang]; 
+
+            // Step 1: Conversion to Decimal (if source is not decimal)
+            if (srcBase !== 10) {
+                const titleHtml = data.expToDecTitle(inputNum, srcBase);
+                explanationHTML += `<h4>${titleHtml}</h4>`;
+                plainTextContent += removeEmojis(titleHtml) + '\n'; // Remove emojis for plain text
+
+                const digits = String(inputNum).toUpperCase().split('').reverse();
+                let sum = 0;
+                for (let i = 0; i < digits.length; i++) {
+                    const digit = digits[i];
+                    let value;
+                    if (srcBase === 16 && 'A' <= digit && digit <= 'F') {
+                        value = digitsMap.indexOf(digit);
+                    } else {
+                        value = parseInt(digit);
+                    }
+                    const term = value * Math.pow(srcBase, i);
+                    sum += term;
+                    const bodyText = data.expToDecBody(digit, i, value, srcBase, term);
+                    explanationHTML += `<p>${bodyText}</p>`;
+                    plainTextContent += bodyText + '\n';
+                }
+                const finalSumText = data.expFinalSum(sum);
+                explanationHTML += `<p><b>${finalSumText}</b></p>`;
+                plainTextContent += finalSumText + '\n\n';
+            }
+
+            // Step 2: Conversion from Decimal (if target is not decimal or if source is decimal and target is binary)
+            // This condition ensures the second part of explanation is always shown correctly
+            // even if srcBase is 10 and target is 2 (e.g., Decimal to Binary)
+            if (targetBase !== 10 || (srcBase === 10 && targetBase === 2)) {
+                const titleHtml = data.expFromDecTitle(decimalValue, targetBase);
+                explanationHTML += `<h4>${titleHtml}</h4>`;
+                plainTextContent += removeEmojis(titleHtml) + '\n';
+
+                let currentNumber = decimalValue;
+                let steps = [];
+                // Collect all division steps
+                while (currentNumber > 0) {
+                    const remainder = currentNumber % targetBase;
+                    const nextNumber = Math.floor(currentNumber / targetBase);
+                    steps.push({ current: currentNumber, next: nextNumber, remainder: remainder });
+                    currentNumber = nextNumber;
+                }
+                if (decimalValue === 0) { // Special case for 0
+                    steps.push({ current: 0, next: 0, remainder: 0 });
+                }
+
+
+                // Display the steps from top to bottom (larger number division to smaller)
+                for(let i = 0; i < steps.length; i++) { // Loop from 0 to steps.length-1 for top-to-bottom
+                    const step = steps[i];
+                    const bodyText = data.expFromDecBody(step.current, targetBase, step.next, step.remainder, digitsMap[step.remainder]);
+                    explanationHTML += `<p>${bodyText}</p>`;
+                    plainTextContent += bodyText + '\n';
+                }
+                
+                const finalResult = fromDecimal(decimalValue, targetBase);
+                const readRemaindersText = data.expReadRemainders(finalResult); 
+                explanationHTML += `<p><b>${readRemaindersText}</b></p>`;
+                plainTextContent += readRemaindersText + '\n';
+                
+                // Add binary conversion table if target base is Binary
+                if (targetBase === 2) {
+                    const paddedBinaryText = data.expPaddedBinary(fromDecimal(decimalValue, 2, 8));
+                    explanationHTML += `<p><b>${paddedBinaryText}</b></p>`;
+                    plainTextContent += paddedBinaryText + '\n\n';
+
+                    // HTML table generation remains the same for display
+                    explanationHTML += `<h4>${data.binaryTableTitle(decimalValue)}</h4>`;
+
+                    let tableHTML = '<table class="binary-conversion-table"><thead><tr>';
+                    let powers = [];
+                    let values = [];
+                    let binaryDigits = [];
+
+                    // Determine the highest power of 2 needed
+                    let highestPower = 0;
+                    if (decimalValue > 0) {
+                        highestPower = Math.floor(Math.log2(decimalValue));
+                    } else if (decimalValue === 0) {
+                        highestPower = 0; // For 0, we still need 2^0 column
+                    }
+                    
+                    // Generate powers and their values from highest to 0
+                    for (let p = highestPower; p >= 0; p--) {
+                        powers.push(p);
+                        values.push(Math.pow(2, p));
+                    }
+
+                    // Populate table headers (powers of 2)
+                    tableHTML += '<th></th>'; // Empty cell for the first column header
+                    let csvTableHeaders = ['']; // CSV headers will still be generated
+                    for (let p of powers) {
+                        const powerHtml = data.binaryTablePowers(p);
+                        tableHTML += `<th>${powerHtml}</th>`;
+                        csvTableHeaders.push(`2^${p}`); // For CSV representation
+                    }
+                    tableHTML += '</tr></thead><tbody><tr>';
+
+                    // Populate second row (decimal values of powers)
+                    tableHTML += `<td>${decimalValue}</td>`; // Display decimal value for reference
+                    let csvTableValues = [decimalValue.toString()]; // CSV values still generated
+                    for (let val of values) {
+                        tableHTML += `<td>${val}</td>`;
+                        csvTableValues.push(val.toString());
+                    }
+                    tableHTML += '</tr><tr>';
+
+                    // Populate third row (binary digits)
+                    tableHTML += `<td></td>`; // Empty cell for the third row first column
+                    let csvTableDigits = ['']; // CSV digits still generated
+                    let tempDecimal = decimalValue;
+                    for (let val of values) {
+                        if (tempDecimal >= val) {
+                            binaryDigits.push(1);
+                            tempDecimal -= val;
+                        } else {
+                            binaryDigits.push(0);
+                        }
+                    }
+                    for (let digit of binaryDigits) {
+                        tableHTML += `<td>${digit}</td>`;
+                        csvTableDigits.push(digit.toString());
+                    }
+                    tableHTML += '</tr></tbody></table>';
+                    explanationHTML += tableHTML;
+
+                    // The ASCII table generation for plainTextContent is removed from here
+                    
+                    // Generate CSV table string (remains for CSV copy button)
+                    currentCsvTableData = [
+                        csvTableHeaders.join(','),
+                        csvTableValues.join(','),
+                        csvTableDigits.join(',')
+                    ].join('\n');
+                    
+                    // Show CSV button when binary table is present
+                    document.getElementById('copy-csv-table-btn').style.display = 'inline-block';
+                }
+            }
+            
+            // Handle the special case where the source and target bases are the same
+            if (srcBase === targetBase && srcBase !== 10) {
+                // This block re-generates explanation for non-decimal same-base conversions
+                // to ensure consistency with the `if (srcBase !== 10)` and `if (targetBase !== 10)` blocks.
+                explanationHTML = '';
+                plainTextContent = '';
+
+                // Part 1: Convert to Decimal
+                const titleToDecHtml = data.expToDecTitle(inputNum, srcBase);
+                explanationHTML += `<h4>${titleToDecHtml}</h4>`;
+                plainTextContent += removeEmojis(titleToDecHtml) + '\n';
+
+                const digits = String(inputNum).toUpperCase().split('').reverse();
+                let sum = 0;
+                for (let i = 0; i < digits.length; i++) {
+                    const digit = digits[i];
+                    let value;
+                    if (srcBase === 16 && 'A' <= digit && digit <= 'F') {
+                        value = digitsMap.indexOf(digit);
+                    } else {
+                        value = parseInt(digit);
+                    }
+                    const term = value * Math.pow(srcBase, i);
+                    sum += term;
+                    const bodyText = data.expToDecBody(digit, i, value, srcBase, term);
+                    explanationHTML += `<p>${bodyText}</p>`;
+                    plainTextContent += bodyText + '\n';
+                }
+                const finalSumText = data.expFinalSum(sum);
+                explanationHTML += `<p><b>${finalSumText}</b></p>`;
+                plainTextContent += finalSumText + '\n\n';
+
+                // Part 2: Convert from Decimal to Same Base
+                const titleFromDecHtml = data.expFromDecTitle(decimalValue, targetBase);
+                explanationHTML += `<h4>${titleFromDecHtml}</h4>`;
+                plainTextContent += removeEmojis(titleFromDecHtml) + '\n';
+
+                let currentNumber = decimalValue;
+                let steps = [];
+                while (currentNumber > 0) {
+                    const remainder = currentNumber % targetBase;
+                    const nextNumber = Math.floor(currentNumber / targetBase);
+                    steps.push({ current: currentNumber, next: nextNumber, remainder: remainder });
+                    currentNumber = nextNumber;
+                }
+                if (decimalValue === 0) {
+                    steps.push({ current: 0, next: 0, remainder: 0 });
+                }
+                
+                for(let i = 0; i < steps.length; i++) {
+                    const step = steps[i];
+                    const bodyText = data.expFromDecBody(step.current, targetBase, step.next, step.remainder, digitsMap[step.remainder]);
+                    explanationHTML += `<p>${bodyText}</p>`;
+                    plainTextContent += bodyText + '\n';
+                }
+                const finalResult = fromDecimal(decimalValue, targetBase);
+                const readRemaindersText = data.expReadRemainders(finalResult);
+                explanationHTML += `<p><b>${readRemaindersText}</b></p>`;
+                plainTextContent += readRemaindersText + '\n';
+
+                if (targetBase === 2) {
+                    const paddedBinaryText = data.expPaddedBinary(fromDecimal(decimalValue, 2, 8));
+                    explanationHTML += `<p><b>${paddedBinaryText}</b></p>`;
+                    plainTextContent += paddedBinaryText + '\n\n';
+
+                    // HTML table generation remains the same for display
+                    explanationHTML += `<h4>${data.binaryTableTitle(decimalValue)}</h4>`;
+
+                    let tableHTML = '<table class="binary-conversion-table"><thead><tr>';
+                    let powers = [];
+                    let values = [];
+                    let binaryDigits = [];
+
+                    let highestPower = 0;
+                    if (decimalValue > 0) {
+                        highestPower = Math.floor(Math.log2(decimalValue));
+                    } else if (decimalValue === 0) {
+                        highestPower = 0;
+                    }
+                    
+                    for (let p = highestPower; p >= 0; p--) {
+                        powers.push(p);
+                        values.push(Math.pow(2, p));
+                    }
+
+                    tableHTML += '<th></th>';
+                    let csvTableHeaders = [''];
+                    for (let p of powers) {
+                        const powerHtml = data.binaryTablePowers(p);
+                        tableHTML += `<th>${powerHtml}</th>`;
+                        csvTableHeaders.push(`2^${p}`);
+                    }
+                    tableHTML += '</tr></thead><tbody><tr>';
+
+                    tableHTML += `<td>${decimalValue}</td>`;
+                    let csvTableValues = [decimalValue.toString()];
+                    for (let val of values) {
+                        tableHTML += `<td>${val}</td>`;
+                        csvTableValues.push(val.toString());
+                    }
+                    tableHTML += '</tr><tr>';
+
+                    tableHTML += `<td></td>`;
+                    let csvTableDigits = [''];
+                    let tempDecimal = decimalValue;
+                    for (let val of values) {
+                        if (tempDecimal >= val) {
+                            binaryDigits.push(1);
+                            tempDecimal -= val;
+                        } else {
+                            binaryDigits.push(0);
+                        }
+                    }
+                    for (let digit of binaryDigits) {
+                        tableHTML += `<td>${digit}</td>`;
+                        csvTableDigits.push(digit.toString());
+                    }
+                    tableHTML += '</tr></tbody></table>';
+                    explanationHTML += tableHTML;
+
+                    // The ASCII table generation for plainTextContent is removed from here
+
+                    currentCsvTableData = [
+                        csvTableHeaders.join(','),
+                        csvTableValues.join(','),
+                        csvTableDigits.join(',')
+                    ].join('\n');
+                    document.getElementById('copy-csv-table-btn').style.display = 'inline-block';
+                }
+            } else if (srcBase === targetBase && srcBase === 10) { // If both are decimal
+                explanationHTML = `<p>The number ${inputNum} is already in base ${srcBase}.</p>`;
+                plainTextContent = `The number ${inputNum} is already in base ${srcBase}.`;
+            }
+
+            explanationContent.innerHTML = explanationHTML;
+            currentPlainTextExplanation = plainTextContent.trim(); // Trim extra newlines
+        }
+
+        // Modified handleExplanation to store state and then call the core generation function
+        function handleExplanation(event) {
+            const toBase = parseInt(event.target.dataset.base);
+            const inputNumber = document.getElementById('input-number').value.trim();
+            const fromBase = parseInt(document.getElementById('from-base').value);
+
+            // Store the current values for later re-rendering on language change
+            lastInputNumberForExplanation = inputNumber;
+            lastFromBaseForExplanation = fromBase;
+            lastToExplainBase = toBase;
+
+            // Ensure the explanation section is visible here
+            document.querySelector('.explanation-section').style.display = 'block';
+
+            generateExplanation(inputNumber, fromBase, toBase);
+        }
+
+        /**
+         * Clears all input and output fields.
+         */
+        function clearAll() {
+            document.getElementById('input-number').value = '';
+            document.getElementById('results').textContent = '';
+            document.getElementById('explanation-content').innerHTML = '';
+            document.querySelector('.explanation-section').style.display = 'none';
+            // Hide CSV button and clear data
+            document.getElementById('copy-csv-table-btn').style.display = 'none';
+            currentPlainTextExplanation = '';
+            currentCsvTableData = null;
+            // Also clear the stored explanation state
+            lastInputNumberForExplanation = '';
+            lastFromBaseForExplanation = 10;
+            lastToExplainBase = null;
+        }
+
+        /**
+         * Copies the main results to the clipboard using document.execCommand.
+         */
+        function copyResults() {
+            const resultsText = document.getElementById('results').textContent;
+            if (resultsText) {
+                const textarea = document.createElement('textarea');
+                textarea.value = resultsText;
+                textarea.style.position = 'fixed'; // Prevent scrolling to bottom of page
+                textarea.style.opacity = 0; // Hide the textarea
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showMessageBox(langData[currentLang].copySuccess);
+                } catch (err) {
+                    showMessageBox(langData[currentLang].copyFail);
+                }
+                document.body.removeChild(textarea);
+            }
+        }
+
+        /**
+         * Copies the full detailed explanation content (plain text, no emojis, ASCII table) to the clipboard.
+         */
+        function copyExplanationContents() {
+            if (currentPlainTextExplanation) {
+                const textarea = document.createElement('textarea');
+                textarea.value = currentPlainTextExplanation;
+                textarea.style.position = 'fixed'; // Prevent scrolling to bottom of page
+                textarea.style.opacity = 0; // Hide the textarea
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showMessageBox(langData[currentLang].copySuccess);
+                } catch (err) {
+                    showMessageBox(langData[currentLang].copyFail);
+                }
+                document.body.removeChild(textarea);
+            } else {
+                showMessageBox(langData[currentLang].copyFail);
+            }
+        }
+
+        /**
+         * Copies the binary conversion table data as CSV to the clipboard.
+         */
+        function copyBinaryTableAsCsv() {
+            if (currentCsvTableData) {
+                const textarea = document.createElement('textarea');
+                textarea.value = currentCsvTableData;
+                textarea.style.position = 'fixed'; // Prevent scrolling to bottom of page
+                textarea.style.opacity = 0; // Hide the textarea
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showMessageBox(langData[currentLang].copySuccess);
+                } catch (err) {
+                    showMessageBox(langData[currentLang].copyFail);
+                }
+                document.body.removeChild(textarea);
+            } else {
+                showMessageBox(langData[currentLang].copyFail);
+            }
+        }
+    </script>
 </body>
 </html>
