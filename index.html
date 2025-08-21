@@ -87,8 +87,8 @@
             flex-direction: column;
         }
 
-        .input-group,
-        .output-section {
+        /* Group for input fields */
+        .input-group {
             margin-bottom: 20px;
         }
 
@@ -402,6 +402,71 @@
         .explanation-copy-buttons button:hover {
             background-color: #5a6268;
         }
+
+        /* --- New/Modified styles for improved input UI/UX --- */
+
+        /* Container for "Enter a number" and Clear button */
+        .input-number-container {
+            display: flex;
+            flex-direction: column; /* Stack label and input/button */
+            margin-bottom: 20px; /* Space before next input group */
+        }
+
+        .input-and-clear {
+            display: flex;
+            align-items: center; /* Vertically align input and button */
+            gap: 10px; /* Space between input field and clear button */
+            margin-top: 8px; /* Space below label */
+        }
+
+        .input-and-clear input[type="text"] {
+            flex-grow: 1; /* Allow input to take remaining space */
+            width: auto; /* Override default 100% width for flex behavior */
+        }
+
+        .clear-top-btn {
+            background: #e9ecef;
+            border: none;
+            color: #555;
+            padding: 12px; /* Consistent padding with input */
+            border-radius: 8px; /* Consistent border-radius */
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0; /* Prevent button from shrinking */
+            /* Fixed height to match input for consistent alignment */
+            height: 48px; /* Adjusted height to match common input field height with padding */
+        }
+
+        .clear-top-btn:hover {
+            background-color: #ced4da;
+        }
+
+        /* Ensure Source Base dropdown also has consistent styling and spacing */
+        .input-group select {
+            margin-top: 8px; /* Consistent spacing after its label */
+        }
+
+        /* Specific styles for handling RTL layout */
+        body[dir="rtl"] .input-and-clear {
+            flex-direction: row-reverse; /* Reverse order for RTL to keep button on left */
+        }
+
+        /* Adjustments for mobile responsiveness */
+        @media (max-width: 480px) {
+            .input-and-clear {
+                flex-direction: column; /* Stack input and button vertically on small screens */
+                align-items: stretch; /* Make items stretch to full width */
+                gap: 10px;
+            }
+            .input-and-clear input[type="text"],
+            .clear-top-btn {
+                width: 100%; /* Full width for better touch targets */
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -445,10 +510,16 @@
             </div>
 
             <div class="input-section">
-                <div class="input-group">
+                <!-- Grouping for "Enter a number" and Clear All button -->
+                <div class="input-number-container">
                     <label for="input-number" id="label-number">Enter a number:</label>
-                    <input type="text" id="input-number" placeholder="e.g., 10110">
+                    <div class="input-and-clear">
+                        <input type="text" id="input-number" placeholder="e.g., 10110">
+                        <button id="clear-btn" class="clear-top-btn" title="Clear All"><i class="fas fa-trash-alt"></i></button>
+                    </div>
                 </div>
+
+                <!-- Original input-group for Source Base -->
                 <div class="input-group">
                     <label for="from-base" id="label-from-base">Source Base:</label>
                     <select id="from-base">
@@ -466,7 +537,6 @@
                     <h2 id="output-title">Results:</h2>
                     <div class="action-buttons">
                         <button id="copy-btn" title="Copy to Clipboard"><i class="fas fa-copy"></i></button>
-                        <button id="clear-btn" title="Clear All"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </div>
                 <div class="results-box" id="results">
@@ -703,9 +773,9 @@
 
             // Event listener for the "Convert" button
             document.getElementById('convert-btn').addEventListener('click', handleConversion);
-            // Event listener for the "Clear" button
+            // Event listener for the "Clear" button (now at the top)
             document.getElementById('clear-btn').addEventListener('click', clearAll);
-            // Event listener for the "Copy" button
+            // Event listener for the "Copy" button (for main results)
             document.getElementById('copy-btn').addEventListener('click', copyResults);
             // Event listener for "Copy Full Explanation" button
             document.getElementById('copy-explanation-btn').addEventListener('click', copyExplanationContents);
@@ -889,7 +959,7 @@
             }
 
             let explanationHTML = '';
-            let plainTextContent = '';
+            let plainTextContent = ''; // This will store the explanation WITHOUT the table for "Copy Full Explanation"
             const data = langData[currentLang]; 
 
             // Step 1: Conversion to Decimal (if source is not decimal)
@@ -952,16 +1022,15 @@
                 const finalResult = fromDecimal(decimalValue, targetBase);
                 const readRemaindersText = data.expReadRemainders(finalResult); 
                 explanationHTML += `<p><b>${readRemaindersText}</b></p>`;
-                plainTextContent += readRemaindersText + '\n';
-                
+                plainTextContent += readRemaindersText + '\n'; // Add to plain text content
+
                 // Add binary conversion table if target base is Binary
                 if (targetBase === 2) {
                     const paddedBinaryText = data.expPaddedBinary(fromDecimal(decimalValue, 2, 8));
                     explanationHTML += `<p><b>${paddedBinaryText}</b></p>`;
-                    plainTextContent += paddedBinaryText + '\n\n';
-
-                    // HTML table generation remains the same for display
+                    // Do NOT add paddedBinaryText to plainTextContent here for "Copy Full Explanation"
                     explanationHTML += `<h4>${data.binaryTableTitle(decimalValue)}</h4>`;
+                    // Do NOT add binaryTableTitle to plainTextContent here for "Copy Full Explanation"
 
                     let tableHTML = '<table class="binary-conversion-table"><thead><tr>';
                     let powers = [];
@@ -1020,8 +1089,9 @@
                     tableHTML += '</tr></tbody></table>';
                     explanationHTML += tableHTML;
 
-                    // The ASCII table generation for plainTextContent is removed from here
-                    
+                    // The ASCII table generation for plainTextContent is now COMPLETELY REMOVED from generateExplanation
+                    // to ensure it is not included in "Copy Full Explanation"
+
                     // Generate CSV table string (remains for CSV copy button)
                     currentCsvTableData = [
                         csvTableHeaders.join(','),
@@ -1039,7 +1109,7 @@
                 // This block re-generates explanation for non-decimal same-base conversions
                 // to ensure consistency with the `if (srcBase !== 10)` and `if (targetBase !== 10)` blocks.
                 explanationHTML = '';
-                plainTextContent = '';
+                plainTextContent = ''; // Reset plainTextContent for this specific case
 
                 // Part 1: Convert to Decimal
                 const titleToDecHtml = data.expToDecTitle(inputNum, srcBase);
@@ -1097,10 +1167,9 @@
                 if (targetBase === 2) {
                     const paddedBinaryText = data.expPaddedBinary(fromDecimal(decimalValue, 2, 8));
                     explanationHTML += `<p><b>${paddedBinaryText}</b></p>`;
-                    plainTextContent += paddedBinaryText + '\n\n';
-
-                    // HTML table generation remains the same for display
+                    // Do NOT add paddedBinaryText to plainTextContent here for "Copy Full Explanation"
                     explanationHTML += `<h4>${data.binaryTableTitle(decimalValue)}</h4>`;
+                    // Do NOT add binaryTableTitle to plainTextContent here for "Copy Full Explanation"
 
                     let tableHTML = '<table class="binary-conversion-table"><thead><tr>';
                     let powers = [];
@@ -1154,7 +1223,8 @@
                     tableHTML += '</tr></tbody></table>';
                     explanationHTML += tableHTML;
 
-                    // The ASCII table generation for plainTextContent is removed from here
+                    // The ASCII table generation for plainTextContent is now COMPLETELY REMOVED from generateExplanation
+                    // to ensure it is not included in "Copy Full Explanation"
 
                     currentCsvTableData = [
                         csvTableHeaders.join(','),
