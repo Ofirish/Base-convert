@@ -74,7 +74,7 @@ function fromDecimal(number, base, padToBits = null) {
 // Object to store all multilingual text strings
 const langData = {
     en: {
-        title: 'Base Converter',
+        title: 'Base Converter by Ofir',
         labelNumber: 'Enter a number:',
         labelFromBase: 'Source Base:',
         convertBtn: 'Convert',
@@ -97,7 +97,7 @@ const langData = {
         expPaddedBinary: (result) => `  Padded to 8 bits: ${result}`,
     },
     he: {
-        title: 'ממיר בסיסים',
+        title: 'ממיר הבסיסים של אופיר',
         labelNumber: 'הכנס מספר:',
         labelFromBase: 'בסיס מקור:',
         convertBtn: 'המר',
