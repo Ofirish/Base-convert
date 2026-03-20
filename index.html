@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Base Converter</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -90,6 +92,7 @@
         }
 
         input[type="text"],
+        input[type="number"],
         select {
             width: 100%;
             padding: 12px;
@@ -100,8 +103,7 @@
             transition: border-color 0.3s;
         }
 
-        input[type="text"]:focus,
-        select:focus {
+        input:focus, select:focus {
             border-color: #007bff;
             outline: none;
         }
@@ -364,6 +366,17 @@
             height: 48px;
         }
 
+        .input-settings-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .input-settings-row .input-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
         body[dir="rtl"] .input-and-clear {
             flex-direction: row-reverse;
         }
@@ -404,14 +417,14 @@
                         <br><br>
                         Enter a whole number, a decimal (e.g., 10.5), or a fraction (e.g., 1/2). Select the Source Base and click Convert.
                         <br><br>
-                        For step-by-step breakdowns, including fractional math, click the base buttons in the Detailed Explanation section.
+                        You can adjust the decimal precision using the "Decimal Places" setting.
                     </p>
                     <p id="usage-text-he" style="display: none;">
                         ברוכים הבאים לממיר הבסיסים!
                         <br><br>
                         הזינו מספר שלם, שבר עשרוני (למשל 10.5), או שבר פשוט (למשל 1/2). בחרו בסיס מקור ולחצו על המר.
                         <br><br>
-                        להסבר מפורט הכולל חישובי שברים, לחצו על כפתורי הבסיס בחלק ההסבר המפורט.
+                        ניתן לכוון את הדיוק העשרוני באמצעות הגדרת "ספרות אחרי הנקודה".
                     </p>
                 </div>
             </div>
@@ -424,15 +437,23 @@
                         <button id="clear-btn" class="clear-top-btn" title="Clear All"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </div>
-                <div class="input-group">
-                    <label for="from-base" id="label-from-base">Source Base:</label>
-                    <select id="from-base">
-                        <option value="2">Binary (2)</option>
-                        <option value="8">Octal (8)</option>
-                        <option value="10" selected>Decimal (10)</option>
-                        <option value="16">Hexadecimal (16)</option>
-                    </select>
+
+                <div class="input-settings-row">
+                    <div class="input-group">
+                        <label for="from-base" id="label-from-base">Source Base:</label>
+                        <select id="from-base">
+                            <option value="2">Binary (2)</option>
+                            <option value="8">Octal (8)</option>
+                            <option value="10" selected>Decimal (10)</option>
+                            <option value="16">Hexadecimal (16)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="decimal-places" id="label-precision">Decimal Places:</label>
+                        <input type="number" id="decimal-places" value="8" min="0" max="20">
+                    </div>
                 </div>
+
                 <button id="convert-btn" class="btn-primary">Convert</button>
             </div>
 
@@ -477,6 +498,7 @@
                 title: 'Base Converter',
                 labelNumber: 'Enter a number:',
                 labelFromBase: 'Source Base:',
+                labelPrecision: 'Decimal Places:',
                 convertBtn: 'Convert',
                 outputTitle: 'Results:',
                 explanationTitle: 'Detailed Explanation',
@@ -505,6 +527,7 @@
                 title: 'ממיר בסיסים',
                 labelNumber: 'הכנס מספר:',
                 labelFromBase: 'בסיס מקור:',
+                labelPrecision: 'ספרות אחרי הנקודה:',
                 convertBtn: 'המר',
                 outputTitle: 'תוצאות:',
                 explanationTitle: 'הסבר מפורט',
@@ -546,19 +569,28 @@
             setTimeout(() => messageBox.classList.remove('show'), duration);
         }
 
+        function getPrecision() {
+            const val = parseInt(document.getElementById('decimal-places').value);
+            return isNaN(val) ? 8 : val;
+        }
+
+        function cleanFloat(num, prec) {
+            const p = typeof prec === 'undefined' ? getPrecision() : prec;
+            return parseFloat(num.toFixed(p));
+        }
+
         function toDecimal(number, base) {
             if (number.includes('/')) {
                 const parts = number.split('/');
                 if (parts.length !== 2) return null;
                 const num = toDecimal(parts[0], base);
                 const den = toDecimal(parts[1], base);
-                return (num !== null && den !== null && den !== 0) ? num / den : null;
+                return (num !== null && den !== null && den !== 0) ? cleanFloat(num / den) : null;
             }
 
             const parts = number.toUpperCase().split('.');
             let decimalValue = 0;
 
-            // Integer part
             const intDigits = parts[0].split('').reverse();
             for (let i = 0; i < intDigits.length; i++) {
                 let val = digitsMap.indexOf(intDigits[i]);
@@ -566,7 +598,6 @@
                 decimalValue += val * Math.pow(base, i);
             }
 
-            // Fractional part
             if (parts.length === 2) {
                 const fracDigits = parts[1].split('');
                 for (let i = 0; i < fracDigits.length; i++) {
@@ -576,7 +607,7 @@
                 }
             } else if (parts.length > 2) return null;
 
-            return decimalValue;
+            return cleanFloat(decimalValue);
         }
 
         function fromDecimal(number, base) {
@@ -585,7 +616,6 @@
             let fracPart = number - intPart;
             let result = "";
 
-            // Integer conversion
             if (intPart === 0) result = "0";
             else {
                 let tempInt = intPart;
@@ -595,33 +625,31 @@
                 }
             }
 
-            // Fractional conversion
             if (fracPart > 0) {
-                result += ".";
+                let fracResult = "";
                 let count = 0;
-                while (fracPart > 0 && count < 10) {
-                    fracPart *= base;
-                    let digit = Math.floor(fracPart);
-                    result += digitsMap[digit];
-                    fracPart -= digit;
+                let tempFrac = fracPart;
+                const prec = getPrecision();
+                while (tempFrac > 0 && count < prec) {
+                    tempFrac = cleanFloat(tempFrac * base, prec + 2);
+                    let digit = Math.floor(tempFrac);
+                    fracResult += digitsMap[digit];
+                    tempFrac = cleanFloat(tempFrac - digit, prec + 2);
                     count++;
                 }
+                if (fracResult.length > 0) result += "." + fracResult;
             }
             return result;
         }
 
         function validateInput(number, base) {
             if (!number) return false;
-            let validChars = base <= 10 ? digitsMap.substring(0, base) : digitsMap.substring(0, base);
+            let validChars = digitsMap.substring(0, base);
             let pattern = new RegExp(`^[${validChars}\\.\\/]+$`, 'i');
             if (!pattern.test(number)) return false;
-            
-            // Cannot have both . and /
             if (number.includes('.') && number.includes('/')) return false;
-            // Only one of either
             if ((number.match(/\./g) || []).length > 1) return false;
             if ((number.match(/\//g) || []).length > 1) return false;
-            
             return true;
         }
 
@@ -650,8 +678,8 @@
             let explanationHTML = '';
             let plainTextContent = '';
             const data = langData[currentLang];
+            const prec = getPrecision();
 
-            // 1. To Decimal
             if (srcBase !== 10) {
                 const title = data.expToDecTitle(inputNum, srcBase);
                 explanationHTML += `<h4>${title}</h4>`;
@@ -659,15 +687,15 @@
 
                 if (inputNum.includes('/')) {
                     const parts = inputNum.split('/');
-                    plainTextContent += `Converting fraction: ${parts[0]} / ${parts[1]}\n`;
+                    const line = `Fraction: ${parts[0]} / ${parts[1]} = ${decimalValue}`;
+                    explanationHTML += `<p>${line}</p>`;
+                    plainTextContent += line + '\n';
                 } else {
                     const parts = inputNum.toUpperCase().split('.');
                     const intDigits = parts[0].split('').reverse();
-                    let sum = 0;
                     for (let i = 0; i < intDigits.length; i++) {
                         let val = digitsMap.indexOf(intDigits[i]);
-                        let term = val * Math.pow(srcBase, i);
-                        sum += term;
+                        let term = cleanFloat(val * Math.pow(srcBase, i), prec);
                         let line = data.expToDecBody(intDigits[i], i, val, srcBase, term);
                         explanationHTML += `<p>${line}</p>`;
                         plainTextContent += line + '\n';
@@ -676,9 +704,8 @@
                         const fracDigits = parts[1].split('');
                         for (let i = 0; i < fracDigits.length; i++) {
                             let val = digitsMap.indexOf(fracDigits[i]);
-                            let term = val * Math.pow(srcBase, -(i + 1));
-                            sum += term;
-                            let line = `Digit '${fracDigits[i]}' at position -${i+1}: ${val} * (${srcBase}^-${i+1}) = ${term.toFixed(6)}`;
+                            let term = cleanFloat(val * Math.pow(srcBase, -(i + 1)), prec);
+                            let line = `Digit '${fracDigits[i]}' at pos -${i+1}: ${val} * (${srcBase}^-${i+1}) = ${term}`;
                             explanationHTML += `<p>${line}</p>`;
                             plainTextContent += line + '\n';
                         }
@@ -688,16 +715,14 @@
                 }
             }
 
-            // 2. From Decimal
             if (targetBase !== 10 || (srcBase === 10 && targetBase === 2)) {
                 const title = data.expFromDecTitle(decimalValue, targetBase);
                 explanationHTML += `<h4>${title}</h4>`;
                 plainTextContent += removeEmojis(title) + '\n';
 
                 let intPart = Math.floor(decimalValue);
-                let fracPart = decimalValue - intPart;
+                let fracPart = cleanFloat(decimalValue - intPart, prec);
 
-                // Integer steps
                 let tempInt = intPart;
                 let intSteps = [];
                 while (tempInt > 0) {
@@ -714,18 +739,17 @@
                     plainTextContent += line + '\n';
                 });
 
-                // Fraction steps
                 if (fracPart > 0) {
                     explanationHTML += `<h4>${data.expFracFromDecTitle(decimalValue, targetBase)}</h4>`;
                     let tempFrac = fracPart;
                     let count = 0;
-                    while (tempFrac > 0 && count < 6) {
-                        let product = tempFrac * targetBase;
+                    while (tempFrac > 0 && count < prec) {
+                        let product = cleanFloat(tempFrac * targetBase, prec + 2);
                         let digit = Math.floor(product);
-                        let line = data.expFracFromDecBody(tempFrac.toFixed(6), targetBase, product.toFixed(6), digitsMap[digit]);
+                        let line = data.expFracFromDecBody(tempFrac, targetBase, product, digitsMap[digit]);
                         explanationHTML += `<p>${line}</p>`;
                         plainTextContent += line + '\n';
-                        tempFrac = product - digit;
+                        tempFrac = cleanFloat(product - digit, prec + 2);
                         count++;
                     }
                 }
@@ -734,7 +758,6 @@
                 explanationHTML += `<p><b>${data.expReadRemainders(final)}</b></p>`;
                 plainTextContent += `Final Result: ${final}\n`;
 
-                // Binary Table (only for integers)
                 if (targetBase === 2 && intPart === decimalValue) {
                     explanationHTML += `<h4>${data.binaryTableTitle(intPart)}</h4>`;
                     let tableHTML = '<table class="binary-conversion-table"><thead><tr><th></th>';
@@ -742,10 +765,8 @@
                     let csvH = [''], csvV = [intPart.toString()], csvD = [''];
                     
                     for (let p = highestPower; p >= 0; p--) {
-                        let val = Math.pow(2, p);
                         tableHTML += `<th>2^${p}</th>`;
                         csvH.push(`2^${p}`);
-                        csvV.push(val.toString());
                     }
                     tableHTML += '</tr></thead><tbody><tr><td>Value</td>';
                     for (let p = highestPower; p >= 0; p--) tableHTML += `<td>${Math.pow(2, p)}</td>`;
@@ -816,10 +837,17 @@
             document.querySelector('h1').textContent = data.title;
             document.getElementById('label-number').textContent = data.labelNumber;
             document.getElementById('label-from-base').textContent = data.labelFromBase;
+            document.getElementById('label-precision').textContent = data.labelPrecision;
             document.getElementById('convert-btn').textContent = data.convertBtn;
             document.getElementById('output-title').textContent = data.outputTitle;
             document.getElementById('explanation-title').textContent = data.explanationTitle;
-            document.querySelectorAll('.exp-btn').forEach(b => b.textContent = data[['binary','octal','decimal','hex'][Math.log2(b.dataset.base)-1] || 'decimal']);
+            document.querySelectorAll('.exp-btn').forEach(b => {
+                const base = b.dataset.base;
+                if (base === "2") b.textContent = data.binary;
+                if (base === "8") b.textContent = data.octal;
+                if (base === "10") b.textContent = data.decimal;
+                if (base === "16") b.textContent = data.hex;
+            });
             document.getElementById('copy-full-exp-text').textContent = data.copyFullExp;
             document.getElementById('copy-csv-table-text').textContent = data.copyCsvTable;
             
@@ -856,5 +884,3 @@
     </script>
 </body>
 </html>
-```eof
-
