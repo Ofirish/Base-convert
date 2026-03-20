@@ -29,7 +29,7 @@
             padding: 30px 40px;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
+            max-width: 800px; /* Slightly wider to accommodate larger tables */
             width: 100%;
             transition: all 0.3s ease;
         }
@@ -295,23 +295,42 @@
             visibility: visible;
         }
 
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 20px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
         .binary-conversion-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 0.9em;
+            font-size: 0.85em;
+            background: #fff;
         }
 
         .binary-conversion-table th,
         .binary-conversion-table td {
-            border: 1px solid #ccc;
-            padding: 8px;
+            border: 1px solid #eee;
+            padding: 10px 6px;
             text-align: center;
+            min-width: 60px;
         }
 
         .binary-conversion-table th {
-            background-color: #e9ecef;
+            background-color: #f1f5f9;
             font-weight: bold;
+            color: #475569;
+        }
+
+        .binary-conversion-table tr td:first-child {
+            background-color: #f8fafc;
+            font-weight: 600;
+            text-align: left;
+            padding-left: 12px;
+            position: sticky;
+            left: 0;
+            z-index: 10;
         }
 
         .explanation-copy-buttons {
@@ -413,18 +432,12 @@
                 </h2>
                 <div id="usage-content" class="collapsible-content">
                     <p id="usage-text-en">
-                        Welcome to the Base Converter!
-                        <br><br>
-                        Enter a whole number, a decimal (e.g., 10.5), or a fraction (e.g., 1/2). Select the Source Base and click Convert.
-                        <br><br>
-                        You can adjust the decimal precision using the "Decimal Places" setting.
+                        Enter a number, a decimal, or a fraction. Select the Source Base and click Convert.
+                        Adjust precision via "Decimal Places".
                     </p>
                     <p id="usage-text-he" style="display: none;">
-                        ברוכים הבאים לממיר הבסיסים!
-                        <br><br>
-                        הזינו מספר שלם, שבר עשרוני (למשל 10.5), או שבר פשוט (למשל 1/2). בחרו בסיס מקור ולחצו על המר.
-                        <br><br>
-                        ניתן לכוון את הדיוק העשרוני באמצעות הגדרת "ספרות אחרי הנקודה".
+                        הזינו מספר שלם, שבר עשרוני, או שבר פשוט. בחרו בסיס מקור ולחצו על המר.
+                        כווננו את הדיוק דרך "ספרות אחרי הנקודה".
                     </p>
                 </div>
             </div>
@@ -483,7 +496,7 @@
                 <div id="explanation-content" class="results-box"></div>
                 <div class="explanation-copy-buttons">
                     <button id="copy-explanation-btn"><i class="fas fa-copy"></i> <span id="copy-full-exp-text">Copy Full Explanation</span></button>
-                    <button id="copy-csv-table-btn" style="display:none;"><i class="fas fa-table"></i> <span id="copy-csv-table-text">Copy Binary Table CSV</span></button>
+                    <button id="copy-csv-table-btn" style="display:none;"><i class="fas fa-table"></i> <span id="copy-csv-table-text">Copy Table CSV</span></button>
                 </div>
             </div>
         </main>
@@ -495,62 +508,10 @@
         const digitsMap = "0123456789ABCDEF";
         const langData = {
             en: {
-                title: 'Base Converter',
-                labelNumber: 'Enter a number:',
-                labelFromBase: 'Source Base:',
-                labelPrecision: 'Decimal Places:',
-                convertBtn: 'Convert',
-                outputTitle: 'Results:',
-                explanationTitle: 'Detailed Explanation',
-                copySuccess: 'Copied to clipboard!',
-                copyFail: 'Could not copy.',
-                invalidNumber: 'Invalid number for selected base.',
-                binary: 'Binary',
-                octal: 'Octal',
-                decimal: 'Decimal',
-                hex: 'Hexadecimal',
-                expToDecTitle: (num, base) => `✨ Converting '${num}' from base ${base} to decimal (base 10) ✨`,
-                expToDecBody: (digit, pos, value, base, term) => `  Digit '${digit}' at position ${pos}: ${value} * (${base}^${pos}) = ${term}`,
-                expFinalSum: (sum) => `  Final Sum: ${sum}`,
-                expFromDecTitle: (num, base) => `✨ Converting '${num}' from decimal (base 10) to base ${base} ✨`,
-                expFromDecBody: (current, base, next, rem, remDigit) => `  ${current} / ${base} = ${next} remainder ${rem} (${remDigit})`,
-                expFracFromDecTitle: (num, base) => `✨ Converting fractional part of '${num}' to base ${base} ✨`,
-                expFracFromDecBody: (current, base, product, digit) => `  ${current} * ${base} = ${product} (Digit: ${digit})`,
-                expReadRemainders: (result) => `  Final Result: ${result}`,
-                expPaddedBinary: (result) => `  Padded to 8 bits: ${result}`,
-                binaryTableTitle: (decimal) => `Binary Conversion Table for ${decimal}`,
-                binaryTablePowers: (power) => `2^${power}`,
-                copyFullExp: 'Copy Full Explanation',
-                copyCsvTable: 'Copy Binary Table CSV',
+                title: 'Base Converter', labelNumber: 'Enter a number:', labelFromBase: 'Source Base:', labelPrecision: 'Decimal Places:', convertBtn: 'Convert', outputTitle: 'Results:', explanationTitle: 'Detailed Explanation', copySuccess: 'Copied to clipboard!', copyFail: 'Could not copy.', invalidNumber: 'Invalid input.', binary: 'Binary', octal: 'Octal', decimal: 'Decimal', hex: 'Hexadecimal', expToDecTitle: (num, base) => `✨ Converting '${num}' from base ${base} to decimal (base 10) ✨`, expToDecBody: (digit, pos, value, base, term) => `  Digit '${digit}' at position ${pos}: ${value} * (${base}^${pos}) = ${term}`, expFinalSum: (sum) => `  Final Sum: ${sum}`, expFromDecTitle: (num, base) => `✨ Converting '${num}' from decimal (base 10) to base ${base} ✨`, expFromDecBody: (current, base, next, rem, remDigit) => `  ${current} / ${base} = ${next} remainder ${rem} (${remDigit})`, expFracFromDecTitle: (num, base) => `✨ Converting fractional part to base ${base} ✨`, expFracFromDecBody: (current, base, product, digit) => `  ${current} * ${base} = ${product} (Digit: ${digit})`, expReadRemainders: (result) => `  Final Result: ${result}`, binaryTableTitle: (decimal) => `Binary Conversion Table for ${decimal}`, copyFullExp: 'Copy Full Explanation', copyCsvTable: 'Copy Table CSV', rowPower: 'Power', rowValue: 'Value', rowBit: 'Bit'
             },
             he: {
-                title: 'ממיר בסיסים',
-                labelNumber: 'הכנס מספר:',
-                labelFromBase: 'בסיס מקור:',
-                labelPrecision: 'ספרות אחרי הנקודה:',
-                convertBtn: 'המר',
-                outputTitle: 'תוצאות:',
-                explanationTitle: 'הסבר מפורט',
-                copySuccess: 'הועתק ללוח!',
-                copyFail: 'העתקה נכשלה.',
-                invalidNumber: 'מספר לא חוקי עבור הבסיס שנבחר.',
-                binary: 'בינארי',
-                octal: 'אוקטלי',
-                decimal: 'עשרוני',
-                hex: 'הקסדצימלי',
-                expToDecTitle: (num, base) => `✨ המרת '${num}' מבסיס ${base} לבסיס עשרוני (10) ✨`,
-                expToDecBody: (digit, pos, value, base, term) => `  הספרה '${digit}' במיקום ${pos}: ${value} * (${base}^${pos}) = ${term}`,
-                expFinalSum: (sum) => `  סיכום סופי: ${sum}`,
-                expFromDecTitle: (num, base) => `✨ המרת '${num}' מבסיס עשרוני (10) לבסיס ${base} ✨`,
-                expFromDecBody: (current, base, next, rem, remDigit) => `  ${current} / ${base} = ${next} עם שארית ${rem} (${remDigit})`,
-                expFracFromDecTitle: (num, base) => `✨ המרת החלק השברי של '${num}' לבסיס ${base} ✨`,
-                expFracFromDecBody: (current, base, product, digit) => `  ${current} * ${base} = ${product} (ספרה: ${digit})`,
-                expReadRemainders: (result) => `  תוצאה סופית: ${result}`,
-                expPaddedBinary: (result) => `  מרופד ל-8 ביטים: ${result}`,
-                binaryTableTitle: (decimal) => `טבלת המרה לבינארי עבור ${decimal}`,
-                binaryTablePowers: (power) => `2^${power}`,
-                copyFullExp: 'העתק הסבר מלא',
-                copyCsvTable: 'העתק טבלת בינארי כ-CSV',
+                title: 'ממיר בסיסים', labelNumber: 'הכנס מספר:', labelFromBase: 'בסיס מקור:', labelPrecision: 'ספרות אחרי הנקודה:', convertBtn: 'המר', outputTitle: 'תוצאות:', explanationTitle: 'הסבר מפורט', copySuccess: 'הועתק ללוח!', copyFail: 'העתקה נכשלה.', invalidNumber: 'קלט לא תקין.', binary: 'בינארי', octal: 'אוקטלי', decimal: 'עשרוני', hex: 'הקסדצימלי', expToDecTitle: (num, base) => `✨ המרת '${num}' מבסיס ${base} לבסיס עשרוני (10) ✨`, expToDecBody: (digit, pos, value, base, term) => `  הספרה '${digit}' במיקום ${pos}: ${value} * (${base}^${pos}) = ${term}`, expFinalSum: (sum) => `  סיכום סופי: ${sum}`, expFromDecTitle: (num, base) => `✨ המרת '${num}' מבסיס עשרוני (10) לבסיס ${base} ✨`, expFromDecBody: (current, base, next, rem, remDigit) => `  ${current} / ${base} = ${next} עם שארית ${rem} (${remDigit})`, expFracFromDecTitle: (num, base) => `✨ המרת החלק השברי לבסיס ${base} ✨`, expFracFromDecBody: (current, base, product, digit) => `  ${current} * ${base} = ${product} (ספרה: ${digit})`, expReadRemainders: (result) => `  תוצאה סופית: ${result}`, binaryTableTitle: (decimal) => `טבלת המרה לבינארי עבור ${decimal}`, copyFullExp: 'העתק הסבר מלא', copyCsvTable: 'העתק טבלה כ-CSV', rowPower: 'חזקה', rowValue: 'ערך', rowBit: 'ביט'
             }
         };
 
@@ -587,17 +548,14 @@
                 const den = toDecimal(parts[1], base);
                 return (num !== null && den !== null && den !== 0) ? cleanFloat(num / den) : null;
             }
-
             const parts = number.toUpperCase().split('.');
             let decimalValue = 0;
-
             const intDigits = parts[0].split('').reverse();
             for (let i = 0; i < intDigits.length; i++) {
                 let val = digitsMap.indexOf(intDigits[i]);
                 if (val === -1 || val >= base) return null;
                 decimalValue += val * Math.pow(base, i);
             }
-
             if (parts.length === 2) {
                 const fracDigits = parts[1].split('');
                 for (let i = 0; i < fracDigits.length; i++) {
@@ -606,7 +564,6 @@
                     decimalValue += val * Math.pow(base, -(i + 1));
                 }
             } else if (parts.length > 2) return null;
-
             return cleanFloat(decimalValue);
         }
 
@@ -615,7 +572,6 @@
             let intPart = Math.floor(number);
             let fracPart = number - intPart;
             let result = "";
-
             if (intPart === 0) result = "0";
             else {
                 let tempInt = intPart;
@@ -624,7 +580,6 @@
                     tempInt = Math.floor(tempInt / base);
                 }
             }
-
             if (fracPart > 0) {
                 let fracResult = "";
                 let count = 0;
@@ -680,6 +635,7 @@
             const data = langData[currentLang];
             const prec = getPrecision();
 
+            // 1. To Decimal
             if (srcBase !== 10) {
                 const title = data.expToDecTitle(inputNum, srcBase);
                 explanationHTML += `<h4>${title}</h4>`;
@@ -715,6 +671,7 @@
                 }
             }
 
+            // 2. From Decimal
             if (targetBase !== 10 || (srcBase === 10 && targetBase === 2)) {
                 const title = data.expFromDecTitle(decimalValue, targetBase);
                 explanationHTML += `<h4>${title}</h4>`;
@@ -723,6 +680,7 @@
                 let intPart = Math.floor(decimalValue);
                 let fracPart = cleanFloat(decimalValue - intPart, prec);
 
+                // Integer Steps
                 let tempInt = intPart;
                 let intSteps = [];
                 while (tempInt > 0) {
@@ -732,13 +690,13 @@
                     tempInt = next;
                 }
                 if (intPart === 0) intSteps.push({current: 0, next: 0, rem: 0, digit: '0'});
-
                 intSteps.forEach(s => {
                     let line = data.expFromDecBody(s.current, targetBase, s.next, s.rem, s.digit);
                     explanationHTML += `<p>${line}</p>`;
                     plainTextContent += line + '\n';
                 });
 
+                // Fraction Steps
                 if (fracPart > 0) {
                     explanationHTML += `<h4>${data.expFracFromDecTitle(decimalValue, targetBase)}</h4>`;
                     let tempFrac = fracPart;
@@ -754,36 +712,69 @@
                     }
                 }
 
-                const final = fromDecimal(decimalValue, targetBase);
-                explanationHTML += `<p><b>${data.expReadRemainders(final)}</b></p>`;
-                plainTextContent += `Final Result: ${final}\n`;
+                const finalResult = fromDecimal(decimalValue, targetBase);
+                explanationHTML += `<p><b>${data.expReadRemainders(finalResult)}</b></p>`;
+                plainTextContent += `Final Result: ${finalResult}\n`;
 
-                if (targetBase === 2 && intPart === decimalValue) {
-                    explanationHTML += `<h4>${data.binaryTableTitle(intPart)}</h4>`;
-                    let tableHTML = '<table class="binary-conversion-table"><thead><tr><th></th>';
+                // 3. Conversion Table (Binary Only)
+                if (targetBase === 2) {
+                    explanationHTML += `<h4>${data.binaryTableTitle(decimalValue)}</h4>`;
+                    let tableHTML = '<div class="table-wrapper"><table class="binary-conversion-table"><thead><tr>';
+                    
+                    let powers = [];
+                    let values = [];
+                    let bits = [];
+                    
+                    // Integer powers
                     let highestPower = intPart > 0 ? Math.floor(Math.log2(intPart)) : 0;
-                    let csvH = [''], csvV = [intPart.toString()], csvD = [''];
-                    
                     for (let p = highestPower; p >= 0; p--) {
-                        tableHTML += `<th>2^${p}</th>`;
-                        csvH.push(`2^${p}`);
+                        powers.push(p);
+                        values.push(Math.pow(2, p));
                     }
-                    tableHTML += '</tr></thead><tbody><tr><td>Value</td>';
-                    for (let p = highestPower; p >= 0; p--) tableHTML += `<td>${Math.pow(2, p)}</td>`;
-                    tableHTML += '</tr><tr><td>Bit</td>';
                     
-                    let temp = intPart;
-                    for (let p = highestPower; p >= 0; p--) {
+                    // Fractional powers (based on result)
+                    const binaryParts = finalResult.split('.');
+                    if (binaryParts[1]) {
+                        for (let i = 0; i < binaryParts[1].length; i++) {
+                            powers.push(-(i + 1));
+                            values.push(Math.pow(2, -(i + 1)));
+                        }
+                    }
+
+                    // Headers
+                    tableHTML += `<th>${data.rowPower}</th>`;
+                    powers.forEach(p => tableHTML += `<th>2<sup>${p}</sup></th>`);
+                    tableHTML += '</tr></thead><tbody><tr>';
+                    
+                    // Value Row
+                    tableHTML += `<td>${data.rowValue}</td>`;
+                    values.forEach(v => tableHTML += `<td>${cleanFloat(v, prec)}</td>`);
+                    tableHTML += '</tr><tr>';
+                    
+                    // Bit Row
+                    tableHTML += `<td>${data.rowBit}</td>`;
+                    let binaryString = binaryParts.join('');
+                    if (intPart === 0 && binaryParts[1]) binaryString = binaryParts[1]; // handle small numbers
+                    
+                    // Re-calculate bits for clarity in loop
+                    let tempVal = decimalValue;
+                    powers.forEach(p => {
                         let val = Math.pow(2, p);
-                        let bit = temp >= val ? 1 : 0;
+                        let bit = tempVal >= val - 0.0000000001 ? 1 : 0; // handle float precision
+                        bits.push(bit);
+                        if (bit) tempVal = cleanFloat(tempVal - val, prec + 5);
                         tableHTML += `<td>${bit}</td>`;
-                        csvD.push(bit.toString());
-                        if (bit) temp -= val;
-                    }
-                    tableHTML += '</tr></tbody></table>';
+                    });
+
+                    tableHTML += '</tr></tbody></table></div>';
                     explanationHTML += tableHTML;
 
-                    currentCsvTableData = [csvH.join(','), csvV.join(','), csvD.join(',')].join('\n');
+                    // CSV
+                    currentCsvTableData = [
+                        [data.rowPower, ...powers.map(p => `2^${p}`)].join(','),
+                        [data.rowValue, ...values.map(v => cleanFloat(v, prec))].join(','),
+                        [data.rowBit, ...bits].join(',')
+                    ].join('\n');
                     document.getElementById('copy-csv-table-btn').style.display = 'inline-block';
                 }
             }
@@ -796,19 +787,9 @@
             const input = document.getElementById('input-number').value.trim();
             const from = parseInt(document.getElementById('from-base').value);
             const resBox = document.getElementById('results');
-            
-            if (!validateInput(input, from)) {
-                resBox.textContent = langData[currentLang].invalidNumber;
-                document.querySelector('.explanation-section').style.display = 'none';
-                return;
-            }
-
+            if (!validateInput(input, from)) { resBox.textContent = langData[currentLang].invalidNumber; return; }
             const dec = toDecimal(input, from);
-            if (dec === null) {
-                resBox.textContent = langData[currentLang].invalidNumber;
-                return;
-            }
-
+            if (dec === null) { resBox.textContent = langData[currentLang].invalidNumber; return; }
             resBox.textContent = `Decimal: ${dec}\nBinary:  ${fromDecimal(dec, 2)}\nOctal:   ${fromDecimal(dec, 8)}\nHex:     ${fromDecimal(dec, 16)}`;
             document.querySelector('.explanation-section').style.display = 'block';
         }
@@ -817,45 +798,23 @@
             const target = parseInt(e.target.dataset.base);
             const input = document.getElementById('input-number').value.trim();
             const from = parseInt(document.getElementById('from-base').value);
-            lastInputNumberForExplanation = input;
-            lastFromBaseForExplanation = from;
-            lastToExplainBase = target;
+            lastInputNumberForExplanation = input; lastFromBaseForExplanation = from; lastToExplainBase = target;
             generateExplanation(input, from, target);
         }
 
         function clearAll() {
-            document.getElementById('input-number').value = '';
-            document.getElementById('results').textContent = '';
-            document.getElementById('explanation-content').innerHTML = '';
-            document.querySelector('.explanation-section').style.display = 'none';
-            lastToExplainBase = null;
+            document.getElementById('input-number').value = ''; document.getElementById('results').textContent = ''; document.getElementById('explanation-content').innerHTML = ''; document.querySelector('.explanation-section').style.display = 'none'; lastToExplainBase = null;
         }
 
         function updateUI() {
             const data = langData[currentLang];
-            document.title = data.title;
-            document.querySelector('h1').textContent = data.title;
-            document.getElementById('label-number').textContent = data.labelNumber;
-            document.getElementById('label-from-base').textContent = data.labelFromBase;
-            document.getElementById('label-precision').textContent = data.labelPrecision;
-            document.getElementById('convert-btn').textContent = data.convertBtn;
-            document.getElementById('output-title').textContent = data.outputTitle;
-            document.getElementById('explanation-title').textContent = data.explanationTitle;
+            document.title = data.title; document.querySelector('h1').textContent = data.title; document.getElementById('label-number').textContent = data.labelNumber; document.getElementById('label-from-base').textContent = data.labelFromBase; document.getElementById('label-precision').textContent = data.labelPrecision; document.getElementById('convert-btn').textContent = data.convertBtn; document.getElementById('output-title').textContent = data.outputTitle; document.getElementById('explanation-title').textContent = data.explanationTitle;
             document.querySelectorAll('.exp-btn').forEach(b => {
                 const base = b.dataset.base;
-                if (base === "2") b.textContent = data.binary;
-                if (base === "8") b.textContent = data.octal;
-                if (base === "10") b.textContent = data.decimal;
-                if (base === "16") b.textContent = data.hex;
+                if (base === "2") b.textContent = data.binary; else if (base === "8") b.textContent = data.octal; else if (base === "10") b.textContent = data.decimal; else if (base === "16") b.textContent = data.hex;
             });
-            document.getElementById('copy-full-exp-text').textContent = data.copyFullExp;
-            document.getElementById('copy-csv-table-text').textContent = data.copyCsvTable;
-            
-            const isHe = currentLang === 'he';
-            document.body.dir = isHe ? 'rtl' : 'ltr';
-            document.getElementById('usage-text-he').style.display = isHe ? 'block' : 'none';
-            document.getElementById('usage-text-en').style.display = isHe ? 'none' : 'block';
-
+            document.getElementById('copy-full-exp-text').textContent = data.copyFullExp; document.getElementById('copy-csv-table-text').textContent = data.copyCsvTable;
+            const isHe = currentLang === 'he'; document.body.dir = isHe ? 'rtl' : 'ltr'; document.getElementById('usage-text-he').style.display = isHe ? 'block' : 'none'; document.getElementById('usage-text-en').style.display = isHe ? 'none' : 'block';
             if (lastToExplainBase) generateExplanation(lastInputNumberForExplanation, lastFromBaseForExplanation, lastToExplainBase);
         }
 
@@ -870,17 +829,12 @@
             document.getElementById('copy-btn').onclick = () => { navigator.clipboard.writeText(document.getElementById('results').textContent).then(() => showMessageBox(langData[currentLang].copySuccess)); };
             document.getElementById('copy-explanation-btn').onclick = () => { navigator.clipboard.writeText(currentPlainTextExplanation).then(() => showMessageBox(langData[currentLang].copySuccess)); };
             document.getElementById('copy-csv-table-btn').onclick = () => { navigator.clipboard.writeText(currentCsvTableData).then(() => showMessageBox(langData[currentLang].copySuccess)); };
-            
             const resize = (size, id) => {
-                document.getElementById('results').style.fontSize = size;
-                document.getElementById('explanation-content').style.fontSize = size;
-                document.querySelectorAll('.text-size-options button').forEach(b => b.classList.remove('active'));
-                document.getElementById(id).classList.add('active');
+                document.getElementById('results').style.fontSize = size; document.getElementById('explanation-content').style.fontSize = size; document.querySelectorAll('.text-size-options button').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active');
             };
-            document.getElementById('small-text').onclick = () => resize('0.9em', 'small-text');
-            document.getElementById('medium-text').onclick = () => resize('1em', 'medium-text');
-            document.getElementById('large-text').onclick = () => resize('1.2em', 'large-text');
+            document.getElementById('small-text').onclick = () => resize('0.9em', 'small-text'); document.getElementById('medium-text').onclick = () => resize('1em', 'medium-text'); document.getElementById('large-text').onclick = () => resize('1.2em', 'large-text');
         });
     </script>
 </body>
 </html>
+
