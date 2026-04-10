@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Base Converter</title>
+    <title>Base Converter & Tutor</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
@@ -29,14 +29,15 @@
             padding: 30px 40px;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            max-width: 800px; /* Slightly wider to accommodate larger tables */
+            max-width: 950px;
             width: 100%;
             transition: all 0.3s ease;
+            margin: 20px;
         }
 
         header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .header-content {
@@ -50,6 +51,36 @@
             margin: 0;
             font-size: 2.2em;
             color: #1a1a1a;
+        }
+
+        /* Tabs Styling */
+        .tab-nav {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 25px;
+            gap: 20px;
+        }
+
+        .tab-btn {
+            padding: 10px 5px;
+            font-weight: 600;
+            color: #6c757d;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         .language-options {
@@ -93,6 +124,7 @@
 
         input[type="text"],
         input[type="number"],
+        textarea,
         select {
             width: 100%;
             padding: 12px;
@@ -103,7 +135,7 @@
             transition: border-color 0.3s;
         }
 
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
             border-color: #007bff;
             outline: none;
         }
@@ -127,18 +159,15 @@
             background-color: #0056b3;
         }
 
-        .output-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .output-header h2,
-        .explanation-section h3 {
-            margin: 0;
-            font-size: 1.4em;
-            color: #1a1a1a;
+        .btn-secondary {
+            background-color: #6c757d;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s;
         }
 
         .results-box {
@@ -271,7 +300,7 @@
         }
 
         .collapsible-content.open {
-            max-height: 500px;
+            max-height: 1000px;
         }
 
         .message-box {
@@ -383,6 +412,7 @@
             justify-content: center;
             flex-shrink: 0;
             height: 48px;
+            width: 48px;
         }
 
         .input-settings-row {
@@ -398,6 +428,64 @@
 
         body[dir="rtl"] .input-and-clear {
             flex-direction: row-reverse;
+        }
+
+        /* Tutor Specific Styling */
+        .tutor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .target-base-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .target-base-btn {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .target-base-btn.active {
+            background: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+
+        .tutor-input-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .theory-item {
+            margin-bottom: 15px;
+            border-left: 4px solid #007bff;
+            padding-left: 10px;
+        }
+
+        body[dir="rtl"] .theory-item {
+            border-left: none;
+            border-right: 4px solid #007bff;
+            padding-left: 0;
+            padding-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .tutor-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 480px) {
@@ -416,7 +504,7 @@
     <div class="container">
         <header>
             <div class="header-content">
-                <h1>Base Converter</h1>
+                <h1 id="app-title">Base Converter</h1>
                 <div class="language-options">
                     <button id="lang-en" class="active">EN</button>
                     <button id="lang-he">HE</button>
@@ -424,79 +512,133 @@
             </div>
         </header>
 
+        <nav class="tab-nav">
+            <div class="tab-btn active" data-tab="converter-tab" id="tab-label-converter">Converter</div>
+            <div class="tab-btn" data-tab="tutor-tab" id="tab-label-tutor">Exercise Tutor</div>
+        </nav>
+
         <main>
-            <div class="explanation-container">
-                <h2 id="usage-toggle" class="collapsible-toggle">
-                    Usage \ הוראות שימוש
-                    <i class="fas fa-chevron-down"></i>
-                </h2>
-                <div id="usage-content" class="collapsible-content">
-                    <p id="usage-text-en">
-                        Enter a number, a decimal, or a fraction. Select the Source Base and click Convert.
-                        Adjust precision via "Decimal Places".
-                    </p>
-                    <p id="usage-text-he" style="display: none;">
-                        הזינו מספר שלם, שבר עשרוני, או שבר פשוט. בחרו בסיס מקור ולחצו על המר.
-                        כווננו את הדיוק דרך "ספרות אחרי הנקודה".
-                    </p>
+            <!-- TAB 1: ORIGINAL CONVERTER -->
+            <div id="converter-tab" class="tab-content active">
+                <div class="explanation-container">
+                    <h2 id="usage-toggle" class="collapsible-toggle">
+                        Usage \ הוראות שימוש
+                        <i class="fas fa-chevron-down"></i>
+                    </h2>
+                    <div id="usage-content" class="collapsible-content">
+                        <!-- Content updated by JavaScript updateUI() -->
+                    </div>
+                </div>
+
+                <div class="input-section">
+                    <div class="input-number-container">
+                        <label for="input-number" id="label-number">Enter a number:</label>
+                        <div class="input-and-clear">
+                            <input type="text" id="input-number" placeholder="e.g., 101.10 or 5/2">
+                            <button id="clear-btn" class="clear-top-btn" title="Clear All"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="input-settings-row">
+                        <div class="input-group">
+                            <label for="from-base" id="label-from-base">Source Base:</label>
+                            <select id="from-base">
+                                <option value="2">Binary (2)</option>
+                                <option value="8">Octal (8)</option>
+                                <option value="10" selected>Decimal (10)</option>
+                                <option value="16">Hexadecimal (16)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="decimal-places" id="label-precision">Decimal Places:</label>
+                            <input type="number" id="decimal-places" value="8" min="0" max="20">
+                        </div>
+                    </div>
+
+                    <button id="convert-btn" class="btn-primary">Convert</button>
+                </div>
+
+                <div class="output-section">
+                    <div class="output-header">
+                        <h2 id="output-title">Results:</h2>
+                        <div class="action-buttons">
+                            <button id="copy-btn" title="Copy to Clipboard"><i class="fas fa-copy"></i></button>
+                        </div>
+                    </div>
+                    <div class="results-box" id="results"></div>
+                    <div class="text-size-options">
+                        <button id="small-text">A</button>
+                        <button id="medium-text" class="active">A</button>
+                        <button id="large-text">A</button>
+                    </div>
+                </div>
+                
+                <div class="explanation-section" id="original-explanation" style="display: none;">
+                    <h3 id="explanation-title">Detailed Explanation</h3>
+                    <div class="explanation-options">
+                        <button class="exp-btn" data-base="2">Binary</button>
+                        <button class="exp-btn" data-base="8">Octal</button>
+                        <button class="exp-btn" data-base="10">Decimal</button>
+                        <button class="exp-btn" data-base="16">Hex</button>
+                    </div>
+                    <div id="explanation-content" class="results-box"></div>
+                    <div class="explanation-copy-buttons">
+                        <button id="copy-explanation-btn"><i class="fas fa-copy"></i> <span id="copy-full-exp-text">Copy Full Explanation</span></button>
+                        <button id="copy-csv-table-btn" style="display:none;"><i class="fas fa-table"></i> <span id="copy-csv-table-text">Copy Table CSV</span></button>
+                    </div>
                 </div>
             </div>
 
-            <div class="input-section">
-                <div class="input-number-container">
-                    <label for="input-number" id="label-number">Enter a number:</label>
-                    <div class="input-and-clear">
-                        <input type="text" id="input-number" placeholder="e.g., 101.10 or 5/2">
-                        <button id="clear-btn" class="clear-top-btn" title="Clear All"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                </div>
+            <!-- TAB 2: EXERCISE TUTOR -->
+            <div id="tutor-tab" class="tab-content">
+                <div class="tutor-grid">
+                    <div class="tutor-input-area">
+                        <div class="tutor-input-header">
+                            <label id="label-exercise">Write Exercise:</label>
+                            <div class="flex gap-2">
+                                <button id="try-example-btn" class="text-xs text-blue-600 underline">Try Example</button>
+                                <button id="clear-tutor-btn" title="Clear Input" class="text-gray-500 hover:text-red-500 transition-colors"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </div>
+                        <textarea id="exercise-input" placeholder="128(10) + f(h) or Ab(h) + 1101(2)" style="height: 120px;"></textarea>
+                        
+                        <div class="mt-4 mb-4">
+                            <label id="label-target-base">Desired Solution Form:</label>
+                            <div class="target-base-options">
+                                <button class="target-base-btn" data-base="2" data-mode="normal" id="tutor-opt-bin">Binary</button>
+                                <button class="target-base-btn" data-base="2" data-mode="table" id="tutor-opt-bin-table">Binary Table</button>
+                                <button class="target-base-btn" data-base="8" data-mode="normal" id="tutor-opt-oct">Octal</button>
+                                <button class="target-base-btn" data-base="8" data-mode="short" id="tutor-opt-oct-short">Octal (Short)</button>
+                                <button class="target-base-btn" data-base="10" data-mode="normal" id="tutor-opt-dec">Decimal</button>
+                                <button class="target-base-btn" data-base="16" data-mode="normal" id="tutor-opt-hex">Hex</button>
+                                <button class="target-base-btn active" data-base="16" data-mode="short" id="tutor-opt-hex-short">Hex (Short)</button>
+                            </div>
+                        </div>
 
-                <div class="input-settings-row">
-                    <div class="input-group">
-                        <label for="from-base" id="label-from-base">Source Base:</label>
-                        <select id="from-base">
-                            <option value="2">Binary (2)</option>
-                            <option value="8">Octal (8)</option>
-                            <option value="10" selected>Decimal (10)</option>
-                            <option value="16">Hexadecimal (16)</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label for="decimal-places" id="label-precision">Decimal Places:</label>
-                        <input type="number" id="decimal-places" value="8" min="0" max="20">
-                    </div>
-                </div>
+                        <button id="solve-exercise-btn" class="btn-primary">Solve Exercise</button>
 
-                <button id="convert-btn" class="btn-primary">Convert</button>
-            </div>
-
-            <div class="output-section">
-                <div class="output-header">
-                    <h2 id="output-title">Results:</h2>
-                    <div class="action-buttons">
-                        <button id="copy-btn" title="Copy to Clipboard"><i class="fas fa-copy"></i></button>
+                        <div class="explanation-section mt-4" style="background: white;">
+                            <h2 id="theory-toggle" class="collapsible-toggle">
+                                Base Arithmetic Methodology \ שיטות חישוב
+                                <i class="fas fa-chevron-down"></i>
+                            </h2>
+                            <div id="theory-content" class="collapsible-content text-sm">
+                                <!-- Content updated by JavaScript updateUI() -->
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="results-box" id="results"></div>
-                <div class="text-size-options">
-                    <button id="small-text">A</button>
-                    <button id="medium-text" class="active">A</button>
-                    <button id="large-text">A</button>
-                </div>
-            </div>
-            
-            <div class="explanation-section" style="display: none;">
-                <h3 id="explanation-title">Detailed Explanation</h3>
-                <div class="explanation-options">
-                    <button class="exp-btn" data-base="2">Binary</button>
-                    <button class="exp-btn" data-base="8">Octal</button>
-                    <button class="exp-btn" data-base="10">Decimal</button>
-                    <button class="exp-btn" data-base="16">Hex</button>
-                </div>
-                <div id="explanation-content" class="results-box"></div>
-                <div class="explanation-copy-buttons">
-                    <button id="copy-explanation-btn"><i class="fas fa-copy"></i> <span id="copy-full-exp-text">Copy Full Explanation</span></button>
-                    <button id="copy-csv-table-btn" style="display:none;"><i class="fas fa-table"></i> <span id="copy-csv-table-text">Copy Table CSV</span></button>
+                    <div class="tutor-output-area">
+                        <label id="label-solution">Solution and Explanation:</label>
+                        <div id="tutor-results" class="results-box" style="font-size: 0.9em; min-height: 200px; padding: 0;">
+                            <div id="tutor-text-output" style="padding: 15px; white-space: pre-wrap;">Waiting for input...</div>
+                            <div id="tutor-table-output"></div>
+                        </div>
+                        <div class="explanation-copy-buttons" id="tutor-copy-buttons" style="display: none;">
+                            <button id="copy-tutor-full"><i class="fas fa-copy"></i> <span id="copy-tutor-full-text">Copy Full Explanation</span></button>
+                            <button id="copy-tutor-steps"><i class="fas fa-file-alt"></i> <span id="copy-tutor-steps-text">Copy Steps Only</span></button>
+                            <button id="copy-tutor-result-only"><i class="fas fa-check"></i> <span id="copy-result-only-text">Result Only</span></button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -506,21 +648,74 @@
 
     <script>
         const digitsMap = "0123456789ABCDEF";
+        const baseAlias = {
+            'h': 16, 'hex': 16, 'd': 10, 'dec': 10,
+            'b': 2, 'bin': 2, 'o': 8, 'oct': 8
+        };
+
         const langData = {
             en: {
-                title: 'Base Converter', labelNumber: 'Enter a number:', labelFromBase: 'Source Base:', labelPrecision: 'Decimal Places:', convertBtn: 'Convert', outputTitle: 'Results:', explanationTitle: 'Detailed Explanation', copySuccess: 'Copied to clipboard!', copyFail: 'Could not copy.', invalidNumber: 'Invalid input.', binary: 'Binary', octal: 'Octal', decimal: 'Decimal', hex: 'Hexadecimal', expToDecTitle: (num, base) => `✨ Converting '${num}' from base ${base} to decimal (base 10) ✨`, expToDecBody: (digit, pos, value, base, term) => `  Digit '${digit}' at position ${pos}: ${value} * (${base}^${pos}) = ${term}`, expFinalSum: (sum) => `  Final Sum: ${sum}`, expFromDecTitle: (num, base) => `✨ Converting '${num}' from decimal (base 10) to base ${base} ✨`, expFromDecBody: (current, base, next, rem, remDigit) => `  ${current} / ${base} = ${next} remainder ${rem} (${remDigit})`, expFracFromDecTitle: (num, base) => `✨ Converting fractional part to base ${base} ✨`, expFracFromDecBody: (current, base, product, digit) => `  ${current} * ${base} = ${product} (Digit: ${digit})`, expReadRemainders: (result) => `  Final Result: ${result}`, binaryTableTitle: (decimal) => `Binary Conversion Table for ${decimal}`, copyFullExp: 'Copy Full Explanation', copyCsvTable: 'Copy Table CSV', rowPower: 'Power', rowValue: 'Value', rowBit: 'Bit'
+                title: 'Base Converter', labelNumber: 'Enter a number:', labelFromBase: 'Source Base:', labelPrecision: 'Decimal Places:', convertBtn: 'Convert', outputTitle: 'Results:', explanationTitle: 'Detailed Explanation', copySuccess: 'Copied to clipboard!', copyFail: 'Could not copy.', invalidNumber: 'Invalid input.', binary: 'Binary', octal: 'Octal', decimal: 'Decimal', hex: 'Hexadecimal', expToDecTitle: (num, base) => `✨ Converting '${num}' from base ${base} to decimal (base 10) ✨`, expToDecBody: (digit, pos, value, base, term) => `  Digit '${digit}' at position ${pos}: ${value} * (${base}^${pos}) = ${term}`, expFinalSum: (sum) => `  Final Sum: ${sum}`, expFromDecTitle: (num, base) => `✨ Converting '${num}' from decimal (base 10) to base ${base} ✨`, expFromDecBody: (current, base, next, rem, remDigit) => `  ${current} / ${base} = ${next} remainder ${rem} (${remDigit})`, expFracFromDecTitle: (num, base) => `✨ Converting fractional part to base ${base} ✨`, expFracFromDecBody: (current, base, product, digit) => `  ${current} * ${base} = ${product} (Digit: ${digit})`, expReadRemainders: (result) => `  Final Result: ${result}`, binaryTableTitle: (decimal) => `Binary Conversion Table for ${decimal}`, copyFullExp: 'Copy Full Explanation', copyCsvTable: 'Copy Table CSV', rowPower: 'Power', rowValue: 'Value', rowBit: 'Bit',
+                tabConverter: 'Converter', tabTutor: 'Exercise Tutor', labelExercise: 'Write Exercise:', labelSolution: 'Solution and Explanation:', solveBtn: 'Solve Exercise', copyFull: 'Copy Full Explanation', copySteps: 'Copy Steps Only', copyResultOnly: 'Result Only',
+                labelTargetBase: 'Desired Solution Form:', tutorOptHex: 'Hex', tutorOptHexShort: 'Hex (Short)', tutorOptDec: 'Decimal', tutorOptOct: 'Octal', tutorOptOctShort: 'Octal (Short)', tutorOptBin: 'Binary', tutorOptBinTable: 'Binary Table',
+                tutorStep1: 'Step 1: Convert all numbers to Binary', tutorStep2: 'Step 2: Binary Arithmetic', tutorStep3Hex: 'Step 3: Convert to Hex via Shortcut Method', tutorStep3Oct: 'Step 3: Convert to Octal via Shortcut Method', tutorStep3Dec: 'Step 3: Convert Binary Result to Decimal', tutorStep3Bin: 'Step 3: Final Binary Result', tutorStep3Std: (baseName) => `Step 3: Convert Result to ${baseName} (via Decimal)`,
+                usageTitle: 'Usage',
+                usageText: `<b>Converter Tab:</b> Convert single numbers, decimals, or fractions between bases. Adjust precision for decimals. View step-by-step conversion logic and binary tables.<br><br><b>Exercise Tutor:</b> Solve expressions like 128(10) + F(H) or 1011 * 10. The system converts everything to Binary, performs the operation, and shows the result in your chosen format (Shortcut grouping for Hex/Octal supported).`,
+                theoryTitle: 'Arithmetic Methodology',
+                theoryContent: `
+                    <div class="theory-item"><b>Addition (+):</b> Align digits. $0+0=0$, $0+1=1$, $1+1=10$ (write $0$, carry $1$), $1+1+1=11$ (write $1$, carry $1$).</div>
+                    <div class="theory-item"><b>Subtraction (-):</b> Align digits. If $0-1$, borrow from the next column (borrowed $1$ becomes $2$ in the current column).</div>
+                    <div class="theory-item"><b>Multiplication (*):</b> Multiply each digit of the multiplier by the multiplicand (like decimal), then sum partial results with shifts.</div>
+                    <div class="theory-item"><b>Division (/):</b> Performed via long division. Find how many times the divisor fits into the dividend prefix.</div>
+                `,
+                opExplAdd: "Explanation: Align the binary points. Start from the rightmost bit. If a sum exceeds 1, carry the 1 to the next left column.",
+                opExplSub: "Explanation: Align the binary points. If you subtract 1 from 0, borrow 1 from the next left digit.",
+                opExplMul: "Explanation: Multiply like decimal multiplication. For every '1' in the bottom number, copy the top number shifted to that position, then sum.",
+                opExplDiv: "Explanation: Perform long division. Subtract the divisor from dividend segments repeatedly until the end.",
+                shortcutStepGroup: (size) => `1. Group bits into sets of ${size} from the decimal point.`,
+                shortcutGroupsLabel: "Groups:",
+                shortcutResultLabel: "Result:",
+                tutorFinalAnsLabel: "Final Answer:",
+                divByZeroErr: "Error: Division by zero"
             },
             he: {
-                title: 'ממיר בסיסים', labelNumber: 'הכנס מספר:', labelFromBase: 'בסיס מקור:', labelPrecision: 'ספרות אחרי הנקודה:', convertBtn: 'המר', outputTitle: 'תוצאות:', explanationTitle: 'הסבר מפורט', copySuccess: 'הועתק ללוח!', copyFail: 'העתקה נכשלה.', invalidNumber: 'קלט לא תקין.', binary: 'בינארי', octal: 'אוקטלי', decimal: 'עשרוני', hex: 'הקסדצימלי', expToDecTitle: (num, base) => `✨ המרת '${num}' מבסיס ${base} לבסיס עשרוני (10) ✨`, expToDecBody: (digit, pos, value, base, term) => `  הספרה '${digit}' במיקום ${pos}: ${value} * (${base}^${pos}) = ${term}`, expFinalSum: (sum) => `  סיכום סופי: ${sum}`, expFromDecTitle: (num, base) => `✨ המרת '${num}' מבסיס עשרוני (10) לבסיס ${base} ✨`, expFromDecBody: (current, base, next, rem, remDigit) => `  ${current} / ${base} = ${next} עם שארית ${rem} (${remDigit})`, expFracFromDecTitle: (num, base) => `✨ המרת החלק השברי לבסיס ${base} ✨`, expFracFromDecBody: (current, base, product, digit) => `  ${current} * ${base} = ${product} (ספרה: ${digit})`, expReadRemainders: (result) => `  תוצאה סופית: ${result}`, binaryTableTitle: (decimal) => `טבלת המרה לבינארי עבור ${decimal}`, copyFullExp: 'העתק הסבר מלא', copyCsvTable: 'העתק טבלה כ-CSV', rowPower: 'חזקה', rowValue: 'ערך', rowBit: 'ביט'
+                title: 'ממיר בסיסים', labelNumber: 'הכנס מספר:', labelFromBase: 'בסיס מקור:', labelPrecision: 'ספרות אחרי הנקודה:', convertBtn: 'המר', outputTitle: 'תוצאות:', explanationTitle: 'הסבר מפורט', copySuccess: 'הועתק ללוח!', copyFail: 'העתקה נכשלה.', invalidNumber: 'קלט לא תקין.', binary: 'בינארי', octal: 'אוקטלי', decimal: 'עשרוני', hex: 'הקסדצימלי', expToDecTitle: (num, base) => `✨ המרת '${num}' מבסיס ${base} לבסיס עשרוני (10) ✨`, expToDecBody: (digit, pos, value, base, term) => `  הספרה '${digit}' במיקום ${pos}: ${value} * (${base}^${pos}) = ${term}`, expFinalSum: (sum) => `  סיכום סופי: ${sum}`, expFromDecTitle: (num, base) => `✨ המרת '${num}' מבסיס עשרוני (10) לבסיס ${base} ✨`, expFromDecBody: (current, base, next, rem, remDigit) => `  ${current} / ${base} = ${next} עם שארית ${rem} (${remDigit})`, expFracFromDecTitle: (num, base) => `✨ המרת החלק השברי לבסיס ${base} ✨`, expFracFromDecBody: (current, base, product, digit) => `  ${current} * ${base} = ${product} (ספרה: ${digit})`, expReadRemainders: (result) => `  תוצאה סופית: ${result}`, binaryTableTitle: (decimal) => `טבלת המרה לבינארי עבור ${decimal}`, copyFullExp: 'העתק הסבר מלא', copyCsvTable: 'העתק טבלה כ-CSV', rowPower: 'חזקה', rowValue: 'ערך', rowBit: 'ביט',
+                tabConverter: 'ממיר', tabTutor: 'מורה לתרגילים', labelExercise: 'כתוב תרגיל:', labelSolution: 'פתרון והסבר:', solveBtn: 'פתור תרגיל', copyFull: 'העתק הסבר מלא', copySteps: 'העתק שלבים בלבד', copyResultOnly: 'תוצאה בלבד',
+                labelTargetBase: 'צורת פתרון רצויה:', tutorOptHex: 'הקסה', tutorOptHexShort: 'הקסה (מקוצרת)', tutorOptDec: 'עשרוני', tutorOptOct: 'אוקטלי', tutorOptOctShort: 'אוקטלי (מקוצרת)', tutorOptBin: 'בינארי', tutorOptBinTable: 'טבלת בינארי',
+                tutorStep1: 'שלב 1: המרת כל המספרים לבינארי', tutorStep2: 'שלב 2: ביצוע חשבון בינארי', tutorStep3Hex: 'שלב 3: המרה להקסה בשיטה המקוצרת', tutorStep3Oct: 'שלב 3: המרה לאוקטלי בשיטה המקוצרת', tutorStep3Dec: 'שלב 3: המרת התוצאה הבינארית לעשרוני', tutorStep3Bin: 'שלב 3: תוצאה בינארית סופית', tutorStep3Std: (baseName) => `שלב 3: המרת התוצאה ל-${baseName} (דרך עשרוני)`,
+                usageTitle: 'הוראות שימוש',
+                usageText: `<b>טאב ממיר:</b> המרת מספרים בודדים, שברים עשרוניים או פשוטים בין בסיסים. ניתן לקבוע דיוק, לראות שלבי הסבר וטבלאות חזקות בינאריות.<br><br><b>מורה לתרגילים:</b> פתרון ביטויים כמו 128(10) + F(H). המערכת ממירה לבינארי, מבצעת את הפעולה ומציגה פתרון בפורמט הרצוי (כולל שיטה מקוצרת להקסה/אוקטלי).`,
+                theoryTitle: 'שיטות חישוב',
+                theoryContent: `
+                    <div class="theory-item"><b>חיבור (+):</b> מיישרים נקודות. $0+0=0$, $0+1=1$, $1+1=10$ (רושמים $0$, שומרים $1$ למעלה), $1+1+1=11$ (רושמים $1$, שומרים $1$).</div>
+                    <div class="theory-item"><b>חיסור (-):</b> מיישרים נקודות. במידה וצריך לחסר $1$ מ-$0$, מבצעים לוויה מהספרה הבאה (ספרה מושאלת הופכת ל-$2$ בעמודה הנוכחית).</div>
+                    <div class="theory-item"><b>כפל (*):</b> כפל ארוך כמו בעשרוני - כופלים כל ספרה של הכופל בנכפל, ומחברים את התוצאות החלקיות תוך הזזה.</div>
+                    <div class="theory-item"><b>חילוק (/):</b> חילוק ארוך - בודקים כמה פעמים המחלק נכנס בתחילית של המחולק ומורידים ספרות בהדרגה.</div>
+                `,
+                opExplAdd: "הסבר: מיישרים לפי הנקודה. מתחילים מימין. אם סכום עמודה גדול מ-1, מעבירים 'Carry' (שארית) של 1 לעמודה הבאה.",
+                opExplSub: "הסבר: מיישרים לפי הנקודה. אם מחסירים 1 מ-0, לווים 1 מהספרה הבאה משמאל.",
+                opExplMul: "הסבר: מבצעים כפל ארוך. עבור כל '1' במספר התחתון, מעתיקים את המספר העליון בהזזה מתאימה, ואז מחברים הכל.",
+                opExplDiv: "הסבר: מבצעים חילוק ארוך. מחסירים את המחלק מהמחולק באופן חוזר ומורידים ספרות עד לסיום המספר.",
+                shortcutStepGroup: (size) => `1. חלק את הביטים לקבוצות של ${size} מהנקודה העשרונית.`,
+                shortcutGroupsLabel: "קבוצות:",
+                shortcutResultLabel: "תוצאה:",
+                tutorFinalAnsLabel: "תוצאה סופית:",
+                divByZeroErr: "שגיאה: חילוק באפס"
             }
         };
 
         let currentLang = 'en';
+        let tutorTargetBase = 16;
+        let tutorTargetMode = 'short';
+        
         let lastInputNumberForExplanation = '';
         let lastFromBaseForExplanation = 10;
         let lastToExplainBase = null;
         let currentPlainTextExplanation = '';
         let currentCsvTableData = null;
+        let lastTutorFullContent = "";
+        let lastTutorStepsContent = "";
+        let lastTutorFinalResult = "";
 
         const messageBox = document.getElementById('message-box');
 
@@ -541,6 +736,7 @@
         }
 
         function toDecimal(number, base) {
+            if (typeof number !== 'string') number = String(number);
             if (number.includes('/')) {
                 const parts = number.split('/');
                 if (parts.length !== 2) return null;
@@ -569,6 +765,8 @@
 
         function fromDecimal(number, base) {
             if (number === 0) return "0";
+            let isNegative = number < 0;
+            number = Math.abs(number);
             let intPart = Math.floor(number);
             let fracPart = number - intPart;
             let result = "";
@@ -594,7 +792,7 @@
                 }
                 if (fracResult.length > 0) result += "." + fracResult;
             }
-            return result;
+            return (isNegative ? "-" : "") + result;
         }
 
         function validateInput(number, base) {
@@ -612,9 +810,212 @@
             return str.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '');
         }
 
+        function binaryShortcutMethod(binString, groupSize, base) {
+            const lang = langData[currentLang];
+            let isNegative = binString.startsWith('-');
+            let cleanBin = binString.replace('-', '');
+            let parts = cleanBin.split('.');
+            let intPart = parts[0];
+            let fracPart = parts[1] || "";
+
+            const stepLabel = base === 16 ? lang.tutorStep3Hex : lang.tutorStep3Oct;
+            let steps = `${stepLabel}:\n`;
+            steps += `${lang.shortcutStepGroup(groupSize)}\n`;
+
+            while (intPart.length % groupSize !== 0) intPart = '0' + intPart;
+            let intGroups = [];
+            let intResult = "";
+            for (let i = 0; i < intPart.length; i += groupSize) {
+                let chunk = intPart.substring(i, i + groupSize);
+                let digit = parseInt(chunk, 2).toString(base).toUpperCase();
+                intGroups.push(chunk);
+                intResult += digit;
+            }
+
+            let fracResult = "";
+            let fracGroups = [];
+            if (fracPart) {
+                while (fracPart.length % groupSize !== 0) fracPart += '0';
+                for (let i = 0; i < fracPart.length; i += groupSize) {
+                    let chunk = fracPart.substring(i, i + groupSize);
+                    let digit = parseInt(chunk, 2).toString(base).toUpperCase();
+                    fracGroups.push(chunk);
+                    fracResult += digit;
+                }
+            }
+
+            let finalResultStr = (isNegative ? "-" : "") + intResult.replace(/^0+(?!$)/, '') + (fracResult ? "." + fracResult : "");
+            steps += `${lang.shortcutGroupsLabel} ${intGroups.join(' ')} ${fracPart ? '. ' + fracGroups.join(' ') : ''}\n`;
+            steps += `${lang.shortcutResultLabel} ${finalResultStr}(${base})`;
+            
+            return { steps, finalResult: finalResultStr };
+        }
+
+        function generateBinaryTableForTutor(decimalValue, resBin) {
+            const data = langData[currentLang];
+            const prec = getPrecision();
+            let intPart = Math.floor(Math.abs(decimalValue));
+            
+            let tableHTML = `<div style="padding: 15px; border-top: 1px solid #eee;"><h4>${data.binaryTableTitle(decimalValue)}</h4>`;
+            tableHTML += '<div class="table-wrapper"><table class="binary-conversion-table"><thead><tr>';
+            
+            let powers = []; let values = []; let bits = [];
+            let highestPower = intPart > 0 ? Math.floor(Math.log2(intPart)) : 0;
+            for (let p = highestPower; p >= 0; p--) { powers.push(p); values.push(Math.pow(2, p)); }
+            
+            const binaryParts = resBin.replace('-', '').split('.');
+            if (binaryParts[1]) { for (let i = 0; i < binaryParts[1].length; i++) { powers.push(-(i + 1)); values.push(Math.pow(2, -(i + 1))); } }
+            
+            tableHTML += `<th>${data.rowPower}</th>`;
+            powers.forEach(p => tableHTML += `<th>2<sup>${p}</sup></th>`);
+            tableHTML += '</tr></thead><tbody><tr>';
+            tableHTML += `<td>${data.rowValue}</td>`;
+            values.forEach(v => tableHTML += `<td>${cleanFloat(v, prec)}</td>`);
+            tableHTML += '</tr><tr>';
+            tableHTML += `<td>${data.rowBit}</td>`;
+            
+            let tempValTable = Math.abs(decimalValue);
+            powers.forEach(p => {
+                let val = Math.pow(2, p);
+                let bit = tempValTable >= val - 0.0000000001 ? 1 : 0;
+                bits.push(bit);
+                if (bit) tempValTable = cleanFloat(tempValTable - val, prec + 5);
+                tableHTML += `<td>${bit}</td>`;
+            });
+            tableHTML += '</tr></tbody></table></div></div>';
+            return tableHTML;
+        }
+
+        function solveExercise() {
+            const input = document.getElementById('exercise-input').value.toLowerCase();
+            const textOutput = document.getElementById('tutor-text-output');
+            const tableOutput = document.getElementById('tutor-table-output');
+            const lang = langData[currentLang];
+            
+            tableOutput.innerHTML = "";
+            
+            const regex = /([0-9a-f.]+)\s*\(\s*([a-z0-9]+)\s*\)/g;
+            let match;
+            let terms = [], bases = [];
+            while ((match = regex.exec(input)) !== null) {
+                let val = match[1];
+                let bStr = match[2];
+                let base = baseAlias[bStr] || parseInt(bStr);
+                terms.push(val); 
+                bases.push(base);
+            }
+
+            let operator = '';
+            let opExpl = '';
+            if (input.includes('+')) { operator = '+'; opExpl = lang.opExplAdd; }
+            else if (input.includes('-')) { operator = '-'; opExpl = lang.opExplSub; }
+            else if (input.includes('*')) { operator = '*'; opExpl = lang.opExplMul; }
+            else if (input.includes('/')) { operator = '/'; opExpl = lang.opExplDiv; }
+
+            if (terms.length < 2 || !operator) {
+                const parts = input.split(operator);
+                if (parts.length >= 2 && /^[01.]+$/.test(parts[0].trim()) && /^[01.]+$/.test(parts[1].trim())) {
+                    terms = [parts[0].trim(), parts[1].trim()];
+                    bases = [2, 2];
+                } else {
+                    textOutput.innerText = currentLang === 'he' ? "פורמט לא תקין. השתמש ב: 128(10) + f(h)" : "Invalid format. Use: 128(10) + f(h)";
+                    document.getElementById('tutor-copy-buttons').style.display = 'none';
+                    return;
+                }
+            }
+
+            let fullExpl = `${lang.tutorStep1}:\n`;
+            let stepsOnly = "";
+            let decimalTerms = [];
+            let binaryTerms = [];
+
+            for (let i = 0; i < terms.length; i++) {
+                let dec = toDecimal(terms[i], bases[i]);
+                if (dec === null) {
+                    textOutput.innerText = `${lang.invalidNumber}: ${terms[i]}`;
+                    return;
+                }
+                let bin = fromDecimal(dec, 2);
+                decimalTerms.push(dec);
+                binaryTerms.push(bin);
+                let line = `${terms[i]}(${bases[i]}) ➔ ${bin}(2)\n`;
+                fullExpl += line;
+                stepsOnly += line;
+            }
+
+            let resDec;
+            if (operator === '+') resDec = decimalTerms[0] + decimalTerms[1];
+            else if (operator === '-') resDec = decimalTerms[0] - decimalTerms[1];
+            else if (operator === '*') resDec = decimalTerms[0] * decimalTerms[1];
+            else if (operator === '/') {
+                if (decimalTerms[1] === 0) {
+                    textOutput.innerText = lang.divByZeroErr;
+                    return;
+                }
+                resDec = decimalTerms[0] / decimalTerms[1];
+            }
+
+            let resBin = fromDecimal(resDec, 2);
+            let mathHeader = `\n${lang.tutorStep2} (${operator}):\n${opExpl}\n`;
+            let visualWidth = Math.max(binaryTerms[0].length, binaryTerms[1].length);
+            let mathVisual = `  ${binaryTerms[0].padStart(visualWidth)}\n${operator} ${binaryTerms[1].padStart(visualWidth)}\n${'-'.repeat(visualWidth + 4)}\n  ${resBin.padStart(visualWidth)}(2)\n`;
+            
+            fullExpl += mathHeader + mathVisual;
+            stepsOnly += mathHeader + mathVisual;
+
+            let finalStepExpl = "";
+            let finalAns = "";
+
+            // Localized base names for Step 3 Standard
+            const bnHex = currentLang === 'he' ? 'הקסדצימלי' : 'Hex';
+            const bnOct = currentLang === 'he' ? 'אוקטלי' : 'Octal';
+
+            if (tutorTargetBase === 16) {
+                if (tutorTargetMode === 'short') {
+                    let res = binaryShortcutMethod(resBin, 4, 16);
+                    finalStepExpl = res.steps;
+                    finalAns = res.finalResult;
+                } else {
+                    finalStepExpl = `${lang.tutorStep3Std(bnHex)}:\n`;
+                    finalStepExpl += `${resBin}(2) ➔ ${resDec}(10) ➔ ${fromDecimal(resDec, 16)}(16)`;
+                    finalAns = fromDecimal(resDec, 16);
+                }
+            } else if (tutorTargetBase === 8) {
+                if (tutorTargetMode === 'short') {
+                    let res = binaryShortcutMethod(resBin, 3, 8);
+                    finalStepExpl = res.steps;
+                    finalAns = res.finalResult;
+                } else {
+                    finalStepExpl = `${lang.tutorStep3Std(bnOct)}:\n`;
+                    finalStepExpl += `${resBin}(2) ➔ ${resDec}(10) ➔ ${fromDecimal(resDec, 8)}(8)`;
+                    finalAns = fromDecimal(resDec, 8);
+                }
+            } else if (tutorTargetBase === 10) {
+                finalStepExpl = `${lang.tutorStep3Dec}:\n`;
+                finalStepExpl += `${resBin}(2) ➔ ${resDec}(10)\n`;
+                finalAns = resDec;
+            } else {
+                finalStepExpl = `${lang.tutorStep3Bin}:\n`;
+                finalStepExpl += `${resBin}(2)`;
+                finalAns = resBin;
+                if (tutorTargetMode === 'table') {
+                   tableOutput.innerHTML = generateBinaryTableForTutor(resDec, resBin);
+                }
+            }
+
+            fullExpl += `\n${finalStepExpl}`;
+            stepsOnly += `\n${lang.tutorFinalAnsLabel} ${finalAns}`;
+
+            textOutput.innerText = fullExpl;
+            lastTutorFullContent = fullExpl;
+            lastTutorStepsContent = stepsOnly;
+            lastTutorFinalResult = String(finalAns);
+            document.getElementById('tutor-copy-buttons').style.display = 'flex';
+        }
+
         function generateExplanation(inputNum, srcBase, targetBase) {
             const explanationContent = document.getElementById('explanation-content');
-            const explanationSection = document.querySelector('.explanation-section');
+            const explanationSection = document.getElementById('original-explanation');
             explanationContent.innerHTML = '';
             explanationSection.style.display = 'block';
             document.getElementById('copy-csv-table-btn').style.display = 'none';
@@ -635,12 +1036,10 @@
             const data = langData[currentLang];
             const prec = getPrecision();
 
-            // 1. To Decimal
             if (srcBase !== 10) {
                 const title = data.expToDecTitle(inputNum, srcBase);
                 explanationHTML += `<h4>${title}</h4>`;
                 plainTextContent += removeEmojis(title) + '\n';
-
                 if (inputNum.includes('/')) {
                     const parts = inputNum.split('/');
                     const line = `Fraction: ${parts[0]} / ${parts[1]} = ${decimalValue}`;
@@ -671,16 +1070,12 @@
                 }
             }
 
-            // 2. From Decimal
             if (targetBase !== 10 || (srcBase === 10 && targetBase === 2)) {
                 const title = data.expFromDecTitle(decimalValue, targetBase);
                 explanationHTML += `<h4>${title}</h4>`;
                 plainTextContent += removeEmojis(title) + '\n';
-
                 let intPart = Math.floor(decimalValue);
                 let fracPart = cleanFloat(decimalValue - intPart, prec);
-
-                // Integer Steps
                 let tempInt = intPart;
                 let intSteps = [];
                 while (tempInt > 0) {
@@ -695,8 +1090,6 @@
                     explanationHTML += `<p>${line}</p>`;
                     plainTextContent += line + '\n';
                 });
-
-                // Fraction Steps
                 if (fracPart > 0) {
                     explanationHTML += `<h4>${data.expFracFromDecTitle(decimalValue, targetBase)}</h4>`;
                     let tempFrac = fracPart;
@@ -711,74 +1104,38 @@
                         count++;
                     }
                 }
-
                 const finalResult = fromDecimal(decimalValue, targetBase);
                 explanationHTML += `<p><b>${data.expReadRemainders(finalResult)}</b></p>`;
                 plainTextContent += `Final Result: ${finalResult}\n`;
-
-                // 3. Conversion Table (Binary Only)
                 if (targetBase === 2) {
                     explanationHTML += `<h4>${data.binaryTableTitle(decimalValue)}</h4>`;
                     let tableHTML = '<div class="table-wrapper"><table class="binary-conversion-table"><thead><tr>';
-                    
-                    let powers = [];
-                    let values = [];
-                    let bits = [];
-                    
-                    // Integer powers
+                    let powers = []; let values = []; let bits = [];
                     let highestPower = intPart > 0 ? Math.floor(Math.log2(intPart)) : 0;
-                    for (let p = highestPower; p >= 0; p--) {
-                        powers.push(p);
-                        values.push(Math.pow(2, p));
-                    }
-                    
-                    // Fractional powers (based on result)
+                    for (let p = highestPower; p >= 0; p--) { powers.push(p); values.push(Math.pow(2, p)); }
                     const binaryParts = finalResult.split('.');
-                    if (binaryParts[1]) {
-                        for (let i = 0; i < binaryParts[1].length; i++) {
-                            powers.push(-(i + 1));
-                            values.push(Math.pow(2, -(i + 1)));
-                        }
-                    }
-
-                    // Headers
+                    if (binaryParts[1]) { for (let i = 0; i < binaryParts[1].length; i++) { powers.push(-(i + 1)); values.push(Math.pow(2, -(i + 1))); } }
                     tableHTML += `<th>${data.rowPower}</th>`;
                     powers.forEach(p => tableHTML += `<th>2<sup>${p}</sup></th>`);
                     tableHTML += '</tr></thead><tbody><tr>';
-                    
-                    // Value Row
                     tableHTML += `<td>${data.rowValue}</td>`;
                     values.forEach(v => tableHTML += `<td>${cleanFloat(v, prec)}</td>`);
                     tableHTML += '</tr><tr>';
-                    
-                    // Bit Row
                     tableHTML += `<td>${data.rowBit}</td>`;
-                    let binaryString = binaryParts.join('');
-                    if (intPart === 0 && binaryParts[1]) binaryString = binaryParts[1]; // handle small numbers
-                    
-                    // Re-calculate bits for clarity in loop
-                    let tempVal = decimalValue;
+                    let tempValTable = decimalValue;
                     powers.forEach(p => {
                         let val = Math.pow(2, p);
-                        let bit = tempVal >= val - 0.0000000001 ? 1 : 0; // handle float precision
+                        let bit = tempValTable >= val - 0.0000000001 ? 1 : 0;
                         bits.push(bit);
-                        if (bit) tempVal = cleanFloat(tempVal - val, prec + 5);
+                        if (bit) tempValTable = cleanFloat(tempValTable - val, prec + 5);
                         tableHTML += `<td>${bit}</td>`;
                     });
-
                     tableHTML += '</tr></tbody></table></div>';
                     explanationHTML += tableHTML;
-
-                    // CSV
-                    currentCsvTableData = [
-                        [data.rowPower, ...powers.map(p => `2^${p}`)].join(','),
-                        [data.rowValue, ...values.map(v => cleanFloat(v, prec))].join(','),
-                        [data.rowBit, ...bits].join(',')
-                    ].join('\n');
+                    currentCsvTableData = [ [data.rowPower, ...powers.map(p => `2^${p}`)].join(','), [data.rowValue, ...values.map(v => cleanFloat(v, prec))].join(','), [data.rowBit, ...bits].join(',') ].join('\n');
                     document.getElementById('copy-csv-table-btn').style.display = 'inline-block';
                 }
             }
-
             explanationContent.innerHTML = explanationHTML;
             currentPlainTextExplanation = plainTextContent.trim();
         }
@@ -791,50 +1148,139 @@
             const dec = toDecimal(input, from);
             if (dec === null) { resBox.textContent = langData[currentLang].invalidNumber; return; }
             resBox.textContent = `Decimal: ${dec}\nBinary:  ${fromDecimal(dec, 2)}\nOctal:   ${fromDecimal(dec, 8)}\nHex:     ${fromDecimal(dec, 16)}`;
-            document.querySelector('.explanation-section').style.display = 'block';
-        }
-
-        function handleExplanation(e) {
-            const target = parseInt(e.target.dataset.base);
-            const input = document.getElementById('input-number').value.trim();
-            const from = parseInt(document.getElementById('from-base').value);
-            lastInputNumberForExplanation = input; lastFromBaseForExplanation = from; lastToExplainBase = target;
-            generateExplanation(input, from, target);
-        }
-
-        function clearAll() {
-            document.getElementById('input-number').value = ''; document.getElementById('results').textContent = ''; document.getElementById('explanation-content').innerHTML = ''; document.querySelector('.explanation-section').style.display = 'none'; lastToExplainBase = null;
+            document.getElementById('original-explanation').style.display = 'block';
         }
 
         function updateUI() {
             const data = langData[currentLang];
-            document.title = data.title; document.querySelector('h1').textContent = data.title; document.getElementById('label-number').textContent = data.labelNumber; document.getElementById('label-from-base').textContent = data.labelFromBase; document.getElementById('label-precision').textContent = data.labelPrecision; document.getElementById('convert-btn').textContent = data.convertBtn; document.getElementById('output-title').textContent = data.outputTitle; document.getElementById('explanation-title').textContent = data.explanationTitle;
+            document.title = data.title;
+            document.querySelector('h1').textContent = data.title;
+            document.getElementById('tab-label-converter').textContent = data.tabConverter;
+            document.getElementById('tab-label-tutor').textContent = data.tabTutor;
+            document.getElementById('label-number').textContent = data.labelNumber;
+            document.getElementById('label-from-base').textContent = data.labelFromBase;
+            document.getElementById('label-precision').textContent = data.labelPrecision;
+            document.getElementById('convert-btn').textContent = data.convertBtn;
+            document.getElementById('output-title').textContent = data.outputTitle;
+            document.getElementById('explanation-title').textContent = data.explanationTitle;
+            document.getElementById('label-exercise').textContent = data.labelExercise;
+            document.getElementById('label-solution').textContent = data.labelSolution;
+            document.getElementById('solve-exercise-btn').textContent = data.solveBtn;
+            document.getElementById('copy-tutor-full-text').textContent = data.copyFull;
+            document.getElementById('copy-tutor-steps-text').textContent = data.copySteps;
+            document.getElementById('copy-result-only-text').textContent = data.copyResultOnly;
+            document.getElementById('label-target-base').textContent = data.labelTargetBase;
+            document.getElementById('usage-toggle').innerHTML = `${data.usageTitle} <i class="fas fa-chevron-down"></i>`;
+            document.getElementById('usage-content').innerHTML = data.usageText;
+            document.getElementById('theory-toggle').innerHTML = `${data.theoryTitle} <i class="fas fa-chevron-down"></i>`;
+            document.getElementById('theory-content').innerHTML = data.theoryContent;
+            
+            document.getElementById('tutor-opt-hex').textContent = data.tutorOptHex;
+            document.getElementById('tutor-opt-hex-short').textContent = data.tutorOptHexShort;
+            document.getElementById('tutor-opt-dec').textContent = data.tutorOptDec;
+            document.getElementById('tutor-opt-oct').textContent = data.tutorOptOct;
+            document.getElementById('tutor-opt-oct-short').textContent = data.tutorOptOctShort;
+            document.getElementById('tutor-opt-bin').textContent = data.tutorOptBin;
+            document.getElementById('tutor-opt-bin-table').textContent = data.tutorOptBinTable;
+
             document.querySelectorAll('.exp-btn').forEach(b => {
                 const base = b.dataset.base;
-                if (base === "2") b.textContent = data.binary; else if (base === "8") b.textContent = data.octal; else if (base === "10") b.textContent = data.decimal; else if (base === "16") b.textContent = data.hex;
+                if (base === "2") b.textContent = data.binary; 
+                else if (base === "8") b.textContent = data.octal; 
+                else if (base === "10") b.textContent = data.decimal; 
+                else if (base === "16") b.textContent = data.hex;
             });
-            document.getElementById('copy-full-exp-text').textContent = data.copyFullExp; document.getElementById('copy-csv-table-text').textContent = data.copyCsvTable;
-            const isHe = currentLang === 'he'; document.body.dir = isHe ? 'rtl' : 'ltr'; document.getElementById('usage-text-he').style.display = isHe ? 'block' : 'none'; document.getElementById('usage-text-en').style.display = isHe ? 'none' : 'block';
+            document.getElementById('copy-full-exp-text').textContent = data.copyFullExp;
+            document.getElementById('copy-csv-table-text').textContent = data.copyCsvTable;
+            
+            const isHe = currentLang === 'he';
+            document.body.dir = isHe ? 'rtl' : 'ltr';
             if (lastToExplainBase) generateExplanation(lastInputNumberForExplanation, lastFromBaseForExplanation, lastToExplainBase);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             updateUI();
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById(btn.dataset.tab).classList.add('active');
+                };
+            });
+
+            document.querySelectorAll('.target-base-btn').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.target-base-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    tutorTargetBase = parseInt(btn.dataset.base);
+                    tutorTargetMode = btn.dataset.mode;
+                };
+            });
+
+            document.getElementById('try-example-btn').onclick = () => {
+                document.getElementById('exercise-input').value = "128(10) + f(h)";
+            };
+
+            document.getElementById('clear-tutor-btn').onclick = () => {
+                document.getElementById('exercise-input').value = "";
+                document.getElementById('tutor-text-output').innerText = "Waiting for input...";
+                document.getElementById('tutor-table-output').innerHTML = "";
+                document.getElementById('tutor-copy-buttons').style.display = 'none';
+            };
+
             document.getElementById('convert-btn').onclick = handleConversion;
-            document.getElementById('clear-btn').onclick = clearAll;
+            document.getElementById('clear-btn').onclick = () => {
+                document.getElementById('input-number').value = ''; 
+                document.getElementById('results').textContent = ''; 
+                document.getElementById('explanation-content').innerHTML = ''; 
+                document.getElementById('original-explanation').style.display = 'none'; 
+                lastToExplainBase = null;
+            };
+            
+            document.getElementById('solve-exercise-btn').onclick = solveExercise;
+
             document.getElementById('lang-en').onclick = () => { currentLang = 'en'; document.getElementById('lang-en').classList.add('active'); document.getElementById('lang-he').classList.remove('active'); updateUI(); };
             document.getElementById('lang-he').onclick = () => { currentLang = 'he'; document.getElementById('lang-he').classList.add('active'); document.getElementById('lang-en').classList.remove('active'); updateUI(); };
-            document.querySelectorAll('.exp-btn').forEach(b => b.onclick = handleExplanation);
-            document.getElementById('usage-toggle').onclick = () => { document.getElementById('usage-content').classList.toggle('open'); document.getElementById('usage-toggle').classList.toggle('open'); };
+            
+            document.querySelectorAll('.exp-btn').forEach(b => b.onclick = (e) => {
+                const target = parseInt(e.target.dataset.base);
+                const input = document.getElementById('input-number').value.trim();
+                const from = parseInt(document.getElementById('from-base').value);
+                lastInputNumberForExplanation = input; lastFromBaseForExplanation = from; lastToExplainBase = target;
+                generateExplanation(input, from, target);
+            });
+
+            document.getElementById('usage-toggle').onclick = () => { 
+                document.getElementById('usage-content').classList.toggle('open'); 
+                document.getElementById('usage-toggle').classList.toggle('open'); 
+            };
+
+            document.getElementById('theory-toggle').onclick = () => { 
+                document.getElementById('theory-content').classList.toggle('open'); 
+                document.getElementById('theory-toggle').classList.toggle('open'); 
+            };
+
             document.getElementById('copy-btn').onclick = () => { navigator.clipboard.writeText(document.getElementById('results').textContent).then(() => showMessageBox(langData[currentLang].copySuccess)); };
             document.getElementById('copy-explanation-btn').onclick = () => { navigator.clipboard.writeText(currentPlainTextExplanation).then(() => showMessageBox(langData[currentLang].copySuccess)); };
             document.getElementById('copy-csv-table-btn').onclick = () => { navigator.clipboard.writeText(currentCsvTableData).then(() => showMessageBox(langData[currentLang].copySuccess)); };
+            
+            document.getElementById('copy-tutor-full').onclick = () => { navigator.clipboard.writeText(lastTutorFullContent).then(() => showMessageBox(langData[currentLang].copySuccess)); };
+            document.getElementById('copy-tutor-steps').onclick = () => { navigator.clipboard.writeText(lastTutorStepsContent).then(() => showMessageBox(langData[currentLang].copySuccess)); };
+            document.getElementById('copy-tutor-result-only').onclick = () => { navigator.clipboard.writeText(lastTutorFinalResult).then(() => showMessageBox(langData[currentLang].copySuccess)); };
+
             const resize = (size, id) => {
-                document.getElementById('results').style.fontSize = size; document.getElementById('explanation-content').style.fontSize = size; document.querySelectorAll('.text-size-options button').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active');
+                document.getElementById('results').style.fontSize = size; 
+                document.getElementById('explanation-content').style.fontSize = size; 
+                document.getElementById('tutor-text-output').style.fontSize = size;
+                document.querySelectorAll('.text-size-options button').forEach(b => b.classList.remove('active')); 
+                document.getElementById(id).classList.add('active');
             };
-            document.getElementById('small-text').onclick = () => resize('0.9em', 'small-text'); document.getElementById('medium-text').onclick = () => resize('1em', 'medium-text'); document.getElementById('large-text').onclick = () => resize('1.2em', 'large-text');
+            document.getElementById('small-text').onclick = () => resize('0.85em', 'small-text'); 
+            document.getElementById('medium-text').onclick = () => resize('1em', 'medium-text'); 
+            document.getElementById('large-text').onclick = () => resize('1.15em', 'large-text');
         });
     </script>
 </body>
 </html>
-
